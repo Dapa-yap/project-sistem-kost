@@ -1,0 +1,67 @@
+/* =========================================================
+   KostKu - admin.css
+   Dashboard, kamar, penghuni, pembayaran, pengaduan, booking (pengelola)
+   ========================================================= */
+.admin-wrap { max-width: 1120px; }
+.split { display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start; }
+.split-wide { grid-template-columns: 1.7fr 1fr; }
+.panel-sticky { position: sticky; top: 84px; }
+.stack { display: flex; flex-direction: column; gap: 20px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.toolbar .input { max-width: 260px; }
+.head-actions { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.head-actions .stats { margin-bottom: 0; flex: 1; }
+.btn-brown { background: #c2410c; color: #fff; }
+.btn-brown:hover { background: #9a3412; }
+.btn-danger-outline { background: #fff; color: var(--red); border-color: var(--red); }
+.btn-danger-outline:hover { background: var(--red-soft); }
+
+/* Daftar ringkas (booking masuk) */
+.mini-list { display: flex; flex-direction: column; gap: 10px; }
+.mini-item { display: block; background: var(--bg); border-radius: 12px; padding: 12px 14px; transition: background .15s; }
+.mini-item:hover { background: var(--navy-soft); }
+.mini-item .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.mini-item strong { font-size: 14px; }
+.mini-item small { color: var(--muted); font-size: 12.5px; }
+
+/* Bukti transfer */
+.proof {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;
+    min-height: 110px; border: 1.5px dashed #b6c4e6; border-radius: var(--radius-sm); background: #f4f7fe; margin-bottom: 14px; padding: 12px;
+}
+.proof strong { color: var(--navy); font-size: 13.5px; }
+.proof span { color: var(--muted); font-size: 13px; }
+.proof.is-empty strong { color: var(--muted); }
+
+/* Panel detail (kanan) */
+.side-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; }
+.side-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.side-empty { color: var(--muted); font-size: 13.5px; padding: 8px 0; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
+
+/* Kamar */
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.5px; color: var(--muted); margin: 8px 0 16px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid var(--navy); background: var(--navy-soft); }
+.legend i.t { background: #9ff0b0; border-color: #15803d; }
+.legend i.b { background: #fff3d6; border-color: #d97706; }
+.legend i.p { background: var(--peach); border-color: var(--orange); }
+.floor-block { margin-bottom: 20px; }
+.floor-block h4 { font-size: 13.5px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+.room-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.room-tiles .denah-room { align-items: flex-start; padding: 10px 12px; min-height: 58px; border-radius: 10px; gap: 2px; }
+.room-tiles .denah-room span { background: none; border: 0; padding: 0; font-weight: 500; opacity: .85; }
+.room-tiles .denah-room.is-mark { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--red); }
+.denah-modal .modal { max-width: 560px; }
+.denah-modal h4 { margin: 14px 0 8px; color: var(--navy); }
+.denah-modal .denah-room span { font-size: 9.5px; }
+
+/* Tabel kecil / detail */
+.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-actions { display: flex; gap: 8px; }
+.count-pill { margin-left: auto; }
+
+@media (max-width: 960px) {
+    .split, .split-wide { grid-template-columns: 1fr; }
+    .panel-sticky { position: static; }
+}
