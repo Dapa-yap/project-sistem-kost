@@ -50,8 +50,8 @@ function get_kamar() {
                 'penghuni'  => $penghuni[$id] ?? null,
                 'kapasitas' => '1 orang',
                 'fasilitas' => $isPrem
-                    ? ['AC', 'Wi-Fi', 'Kasur & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi']
-                    : ['Kipas angin', 'Wi-Fi', 'Kasur & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi'],
+                    ? ['Wi-Fi', 'SpringBed & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi']
+                    : ['Wi-Fi', 'Kasur & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi'],
             ];
         }
     }
@@ -180,5 +180,55 @@ function get_booking() {
         ['id' => 4, 'nama' => 'Nadia Safitri', 'hp' => '0878-3321-7765', 'kamar' => 'A-08', 'tipe' => 'Standar', 'tgl' => '2026-10-08', 'batas' => '2026-10-11', 'status' => 'dikonfirmasi', 'urgent' => false],
         ['id' => 5, 'nama' => 'Bayu Prakoso',  'hp' => '0896-2210-4543', 'kamar' => 'B-05', 'tipe' => 'Standar', 'tgl' => '2026-10-07', 'batas' => '2026-10-10', 'status' => 'dikonfirmasi', 'urgent' => false],
         ['id' => 6, 'nama' => 'Laras Ayu',     'hp' => '0813-9087-1122', 'kamar' => 'A-09', 'tipe' => 'Standar', 'tgl' => '2026-10-05', 'batas' => '2026-10-08', 'status' => 'kedaluwarsa', 'urgent' => false],
+    ];
+}
+
+/* ---------- Kunjungan ---------- */
+
+function get_kunjungan() {
+    return [
+        [
+            'id' => 1,
+            'nama' => 'Rizky Pratama',
+            'hp' => '0812-3456-7890',
+            'kamar' => 'A-02',
+            'tanggal' => '2026-10-14',
+            'jam' => '10:00',
+            'catatan' => 'Ingin melihat kondisi kamar secara langsung.',
+            'status' => 'menunggu',
+        ],
+
+        [
+            'id' => 2,
+            'nama' => 'Andi Saputra',
+            'hp' => '0857-1234-5678',
+            'kamar' => 'B-01',
+            'tanggal' => '2026-10-15',
+            'jam' => '13:00',
+            'catatan' => 'Datang bersama orang tua.',
+            'status' => 'dikonfirmasi',
+        ],
+
+        [
+            'id' => 3,
+            'nama' => 'Fajar Maulana',
+            'hp' => '0896-2345-6789',
+            'kamar' => 'A-05',
+            'tanggal' => '2026-10-12',
+            'jam' => '15:00',
+            'catatan' => 'Ingin melihat kamar dan fasilitas kost.',
+            'status' => 'selesai',
+        ],
+
+        [
+            'id' => 4,
+            'nama' => 'Dimas Putra',
+            'hp' => '0813-9876-5432',
+            'kamar' => 'B-06',
+            'tanggal' => '2026-10-11',
+            'jam' => '11:00',
+            'catatan' => '',
+            'status' => 'dibatalkan',
+        ],
     ];
 }

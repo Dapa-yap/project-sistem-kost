@@ -40,9 +40,38 @@ include ROOT_PATH . '/header/header.php';
                     <h3>Ingin melihat langsung?</h3>
                     <p>Jadwalkan kunjungan, pengelola akan menemani Anda.</p>
                 </div>
-                <a class="btn btn-accent" href="<?= url('guest/kamar.php?filter=kosong') ?>">Jadwalkan Kunjungan</a>
+                <a class="btn btn-accent" href="#modal-kunjungan" data-open="modal-kunjungan">Jadwalkan Kunjungan</a>
             </div>
         </div>
     </section>
 </main>
+<!-- Modal: Jadwalkan kunjungan -->
+<div class="modal-overlay" id="modal-kunjungan">
+    <div class="modal is-wide" role="dialog" aria-modal="true" aria-labelledby="mk-title">
+        <div class="modal-head">
+            <div>
+                <h3 id="mk-title">Jadwalkan Kunjungan</h3>
+                <p>Datang dan lihat kost langsung. Gratis, tanpa kewajiban booking.</p>
+            </div>
+            <button class="modal-x" type="button" data-close aria-label="Tutup"><?= icon('x', 16) ?></button>
+        </div>
+        <form id="kunjungan-form"
+      data-kamar-url="<?= url('guest/kamar.php') ?>"
+      novalidate>
+            <div class="field-row">
+                <div class="field"><label for="k-nama">Nama lengkap</label><input class="input" id="k-nama" name="nama" placeholder="Nama Anda" required></div>
+                <div class="field"><label for="k-wa">Nomor WhatsApp</label><input class="input" id="k-wa" name="wa" inputmode="tel" placeholder="0812xxxxxxx" required data-pattern="^[0-9+\- ]{9,16}$" data-pattern-msg="Nomor tidak valid"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label for="k-tgl">Tanggal kunjungan</label><input class="input" type="date" id="k-tgl" name="tgl" required></div>
+            </div>
+            <div class="field"><label for="k-catatan">Catatan (opsional)</label><textarea class="textarea" id="k-catatan" name="catatan" placeholder="Misalnya: datang bersama orang tua"></textarea></div>
+            <p class="field-hint">Kunjungan Senin–Sabtu. Pengelola membalas lewat WhatsApp untuk memastikan jadwal.</p>
+            <div class="modal-foot">
+                <button class="btn btn-ghost" type="button" data-close>Batal</button>
+                <button class="btn btn-accent" type="submit">Kirim Jadwal</button>
+            </div>
+        </form>
+    </div>
+</div>
 <?php include ROOT_PATH . '/footer/footer.php'; ?>

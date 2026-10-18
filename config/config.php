@@ -83,6 +83,12 @@ function status_badge($type, $status) {
             'selesai'  => ['Selesai', 'green'],
             'ditolak'  => ['Ditolak', 'red-solid'],
         ],
+        'kunjungan' => [
+            'menunggu'     => ['Menunggu', 'blue'],
+            'dikonfirmasi' => ['Dikonfirmasi', 'green'],
+            'selesai'      => ['Selesai', 'green'],
+            'dibatalkan'   => ['Dibatalkan', 'red-solid'],
+        ],
     ];
     $m = $maps[$type][$status] ?? [ucfirst($status), 'grey'];
     return badge($m[0], $m[1]);

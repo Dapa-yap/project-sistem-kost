@@ -364,7 +364,8 @@
         bayar:   { belum: ['Belum Dibayar', 'orange'], menunggu: ['Menunggu Verifikasi', 'blue'], lunas: ['Lunas', 'green'], terlambat: ['Terlambat', 'red'], ditolak: ['Ditolak', 'red-solid'] },
         aduan:   { diajukan: ['Diajukan', 'blue'], diproses: ['Diproses', 'orange'], selesai: ['Selesai', 'green'] },
         booking: { menunggu: ['Menunggu', 'blue'], dikonfirmasi: ['Dikonfirmasi', 'green'], kedaluwarsa: ['Kedaluwarsa', 'orange'], ditolak: ['Ditolak', 'red-solid'] },
-        pindah:  { menunggu: ['Menunggu', 'orange'], selesai: ['Selesai', 'green'], ditolak: ['Ditolak', 'red-solid'] }
+        pindah:  { menunggu: ['Menunggu', 'orange'], selesai: ['Selesai', 'green'], ditolak: ['Ditolak', 'red-solid'] },
+        kunjungan: { menunggu: ['Menunggu', 'blue'], dikonfirmasi: ['Dikonfirmasi', 'green'], selesai: ['Selesai', 'green'], dibatalkan: ['Dibatalkan', 'red-solid'] }
     };
     KK.badge = function (type, status) {
         var m = (BADGES[type] || {})[status] || [status, 'grey'];
