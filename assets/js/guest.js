@@ -11,6 +11,18 @@
     var page = document.body.dataset.page;
     var DATA = window.KOSTKU_DATA || {};
 
+    /* Kirim form pengunjung (survey / kunjungan / reset password) ke server sebagai JSON */
+    function kirim(url, fields) {
+        var fd = new FormData();
+        Object.keys(fields).forEach(function (k) { fd.append(k, fields[k] == null ? '' : fields[k]); });
+        return fetch(KK.url(url), { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) {
+                return r.json().catch(function () { throw new Error('Respon server tidak dikenali.'); })
+                    .then(function (j) { if (!j.ok) throw new Error(j.error || 'Terjadi kesalahan.'); return j; });
+            }, function () { throw new Error('Tidak dapat terhubung ke server.'); });
+    }
+    function gagal(err) { KK.toast(err && err.message ? err.message : 'Gagal mengirim', 'error'); }
+
     /* ---------- Daftar kamar: urutkan ---------- */
     function initKamar() {
         var list = $('#room-list');
@@ -101,43 +113,48 @@
                 var nama = f.get('nama');
                 var wa = f.get('wa');
 
-                // TODO (database): INSERT jadwal survei
+                kirim('guest/kunjungan-simpan.php', {
+                    jenis: 'survey', nama: nama, wa: wa, tgl: f.get('tgl'), jam: f.get('jam'),
+                    kamar: kamar, catatan: f.get('catatan')
+                }).then(function () {
 
-                KK.closeModal('modal-survey');
+                    KK.closeModal('modal-survey');
 
-                KK.dialog({
-                    type: 'success',
-                    title: 'Jadwal survei terkirim',
-                    text:
-                        'Kunjungan ke kamar ' +
-                        kamar +
-                        ' pada ' +
-                        KK.fmtDate(f.get('tgl'), true) +
-                        ', pukul ' +
-                        f.get('jam') +
-                        '. Pengelola akan mengonfirmasi lewat WhatsApp.',
+                    KK.dialog({
+                        type: 'success',
+                        title: 'Jadwal survei terkirim',
+                        text:
+                            'Kunjungan ke kamar ' +
+                            kamar +
+                            ' pada ' +
+                            KK.fmtDate(f.get('tgl'), true) +
+                            ', pukul ' +
+                            f.get('jam') +
+                            '. Pengelola akan mengonfirmasi lewat WhatsApp.',
 
-                    actions: [
-                        {
-                            label: 'Booking Kamar Ini',
-                            cls: 'btn-outline',
+                        actions: [
+                            {
+                                label: 'Booking Kamar Ini',
+                                cls: 'btn-outline',
 
-                            onClick: function () {
-                                $('#b-nama').value = nama;
-                                $('#b-wa').value = wa;
+                                onClick: function () {
+                                    $('#b-nama').value = nama;
+                                    $('#b-wa').value = wa;
 
-                                KK.openModal('modal-booking');
+                                    KK.openModal('modal-booking');
+                                }
+                            },
+
+                            {
+                                label: 'Tutup',
+                                cls: 'btn-primary'
                             }
-                        },
+                        ]
+                    });
 
-                        {
-                            label: 'Tutup',
-                            cls: 'btn-primary'
-                        }
-                    ]
-                });
 
-                KK.resetForm(surveyForm);
+                    KK.resetForm(surveyForm);
+                }).catch(gagal);
             });
         }
     }
@@ -187,52 +204,48 @@
                 return;
             }
 
-            /*
-             * Kunjungan dibuat sama seperti Survey.
-             * Tidak menggunakan fetch().
-             * Tidak dikirim ke backend.
-             * Data hanya digunakan untuk simulasi
-             * bahwa jadwal berhasil dikirim.
-             */
+            kirim('guest/kunjungan-simpan.php', {
+                jenis: 'kunjungan', nama: f.get('nama'), wa: f.get('wa'), tgl: f.get('tgl'), catatan: f.get('catatan')
+            }).then(function () {
+                // Ambil URL daftar kamar dari atribut form
+                var kamarUrl = form.dataset.kamarUrl;
 
-            // Ambil URL daftar kamar dari atribut form
-            var kamarUrl = form.dataset.kamarUrl;
+                // Tutup modal Kunjungan
+                KK.closeModal('modal-kunjungan');
 
-            // Tutup modal Kunjungan
-            KK.closeModal('modal-kunjungan');
+                // Tampilkan pesan berhasil
+                KK.dialog({
+                    type: 'success',
 
-            // Tampilkan pesan berhasil
-            KK.dialog({
-                type: 'success',
+                    title: 'Jadwal kunjungan terkirim',
 
-                title: 'Jadwal kunjungan terkirim',
+                    text:
+                        'Kunjungan pada ' +
+                        KK.fmtDate(f.get('tgl'), true) +
+                        '. Pengelola akan mengonfirmasi lewat WhatsApp.',
 
-                text:
-                    'Kunjungan pada ' +
-                    KK.fmtDate(f.get('tgl'), true) +
-                    '. Pengelola akan mengonfirmasi lewat WhatsApp.',
+                    actions: [
+                        {
+                            label: 'Lihat Daftar Kamar',
+                            cls: 'btn-outline',
 
-                actions: [
-                    {
-                        label: 'Lihat Daftar Kamar',
-                        cls: 'btn-outline',
-
-                        onClick: function () {
-                            if (kamarUrl) {
-                                window.location.href = kamarUrl;
+                            onClick: function () {
+                                if (kamarUrl) {
+                                    window.location.href = kamarUrl;
+                                }
                             }
+                        },
+
+                        {
+                            label: 'Tutup',
+                            cls: 'btn-primary'
                         }
-                    },
+                    ]
+                });
 
-                    {
-                        label: 'Tutup',
-                        cls: 'btn-primary'
-                    }
-                ]
-            });
 
-            // Reset form setelah berhasil
-            KK.resetForm(form);
+                KK.resetForm(form);
+            }).catch(gagal);
         });
     }
 
@@ -268,19 +281,14 @@
 
             if (!KK.validate(reset)) return;
 
-            // TODO (database):
-            // verifikasi password lama,
-            // UPDATE password_hash
-
-            KK.closeModal('modal-reset');
-
-            KK.success(
-                'Password berhasil diubah',
-                'Silakan masuk dengan kata sandi baru Anda.',
-                'Kembali'
-            );
-
-            KK.resetForm(reset);
+            var rf = new FormData(reset);
+            kirim('guest/reset-password.php', {
+                username: String(rf.get('username')).trim(), lama: rf.get('lama'), baru: rf.get('baru')
+            }).then(function () {
+                KK.closeModal('modal-reset');
+                KK.success('Password berhasil diubah', 'Silakan masuk dengan kata sandi baru Anda.', 'Kembali');
+                KK.resetForm(reset);
+            }).catch(gagal);
         });
     }
 

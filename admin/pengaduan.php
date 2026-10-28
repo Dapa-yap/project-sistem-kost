@@ -37,7 +37,7 @@ include ROOT_PATH . '/header/header.php';
                     <?php foreach ($aduan as $a): ?>
                         <tr data-aduan="<?= (int) $a['id'] ?>" data-status="<?= e($a['status']) ?>">
                             <td><?= e($a['kamar']) ?></td><td><?= e($a['deskripsi']) ?></td>
-                            <td><?= badge($a['foto'] . ' foto', 'blue') ?></td>
+                            <td><?= $a['foto'] ? badge('1 foto', 'blue') : badge('Tanpa foto', 'grey') ?></td>
                             <td class="nowrap"><?= e(tgl($a['tgl'])) ?></td>
                             <td class="col-status"><?= status_badge('aduan', $a['status']) ?></td>
                             <td><button class="btn <?= $a['status'] === 'diajukan' ? 'btn-brown' : 'btn-outline' ?> btn-sm" type="button" data-act="aduan">Ubah Status</button></td>

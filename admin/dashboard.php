@@ -42,7 +42,7 @@ include ROOT_PATH . '/header/header.php';
                     <tbody id="verif-body">
                         <?php foreach ($menunggu as $i => $p): ?>
                             <tr data-pay="<?= (int) $p['id'] ?>">
-                                <td><?= e($p['kamar']) ?></td><td><?= e($p['nama']) ?></td><td>Okt 2026</td><td class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td>
+                                <td><?= e($p['kamar']) ?></td><td><?= e($p['nama']) ?></td><td><?= e($p['periode']) ?></td><td class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td>
                                 <td><button class="btn <?= $i === 0 ? 'btn-accent' : 'btn-outline' ?> btn-sm" type="button" data-act="verifikasi">Verifikasi</button></td>
                             </tr>
                         <?php endforeach; ?>

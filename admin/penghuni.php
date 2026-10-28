@@ -10,7 +10,8 @@ $total    = count($kamar);
 $terisi   = count($penghuni);
 $kosong   = count(array_filter($kamar, fn($k) => $k['status'] === 'kosong'));
 $pending  = count(array_filter($pindah, fn($p) => $p['status'] === 'menunggu'));
-$kamarKosong = array_values(array_filter($kamar, fn($k) => $k['status'] === 'kosong'));
+// kamar yang bisa ditempati: kosong, atau sudah ditahan lewat booking
+$kamarKosong = array_values(array_filter($kamar, fn($k) => in_array($k['status'], ['kosong', 'booking'], true)));
 
 $pageData = ['penghuni' => $penghuni, 'pindah' => $pindah, 'kamar' => $kamar, 'totalKamar' => $total];
 
@@ -77,7 +78,7 @@ include ROOT_PATH . '/header/header.php';
 <div class="modal-overlay" id="modal-tambah">
     <div class="modal is-wide" role="dialog" aria-modal="true" aria-labelledby="mt-title">
         <div class="modal-head">
-            <div><h3 id="mt-title">Tambah penghuni</h3><p>Buat akun penghuni dan tempatkan di kamar.</p></div>
+            <div><h3 id="mt-title">Tambah penghuni</h3><p>Penghuni tidak bisa mendaftar sendiri. Buat akunnya di sini lalu berikan username dan password ke penghuni.</p></div>
             <button class="modal-x" type="button" data-close aria-label="Tutup"><?= icon('x', 16) ?></button>
         </div>
         <form id="tambah-form" novalidate>
@@ -94,7 +95,7 @@ include ROOT_PATH . '/header/header.php';
                     <select class="select" id="t-kamar" name="kamar" required>
                         <option value="">Pilih kamar kosong</option>
                         <?php foreach ($kamarKosong as $k): ?>
-                            <option value="<?= e($k['id']) ?>"><?= e($k['id']) ?> · <?= e($k['tipe']) ?></option>
+                            <option value="<?= e($k['id']) ?>"><?= e($k['id']) ?> · <?= e($k['tipe']) ?><?= $k['status'] === 'booking' ? ' (sudah dibooking)' : '' ?></option>
                         <?php endforeach; ?>
                     </select></div>
                 <div class="field"><label for="t-tgl">Tanggal masuk</label><input class="input" type="date" id="t-tgl" name="tgl" required></div>

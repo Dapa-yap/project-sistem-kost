@@ -3,8 +3,8 @@
    Dashboard, kamar, penghuni, pembayaran, pengaduan, booking,
    kunjungan & survey.
    Data awal datang dari PHP lewat window.KOSTKU_DATA.
-   Semua aksi di sini baru mengubah tampilan (belum ke database).
-   Titik yang perlu diganti ke database ditandai: TODO (database)
+   Semua aksi disimpan ke database lewat api/admin.php (KK.api).
+   Tampilan hanya diubah setelah server menjawab berhasil.
    ========================================================= */
 (function () {
     'use strict';
@@ -26,6 +26,11 @@
         var g = $(selector);
         if (g) KK.applyChipFilter(g);
     }
+    function fail(err) { KK.toast(err && err.message ? err.message : 'Gagal menyimpan', 'error'); }
+    function berkas(f) { return KK.url('api/berkas.php?f=' + encodeURIComponent(f)); }
+    function buktiHtml(f) {
+        return f ? '<a class="link" href="' + KK.esc(berkas(f)) + '" target="_blank" rel="noopener">Lihat foto bukti</a>' : 'Belum ada bukti';
+    }
     function selectRow(tbodySel, tr) {
         $$(tbodySel + ' tr').forEach(function (r) { r.classList.toggle('is-selected', r === tr); });
     }
@@ -42,7 +47,8 @@
             if (!p) return;
             currentId = id;
             $('#mv-sub').textContent = p.nama + ' · Kamar ' + p.kamar;
-            $('#mv-file').textContent = p.bukti || 'Belum ada bukti';
+            $('#mv-file').innerHTML = buktiHtml(p.bukti);
+            if ($('#mv-periode')) $('#mv-periode').textContent = p.periode || '-';
             $('#modal-verif .proof').classList.toggle('is-empty', !p.bukti);
             $('#mv-jumlah').textContent = KK.rupiah(p.jumlah);
             $('#mv-dikirim').textContent = shortTime(p.dikirim);
@@ -54,10 +60,10 @@
         }
 
         function setPay(id, status) {
-            var p = byId(pay, id);
-            p.status = status;
-            // TODO (database): UPDATE pembayaran SET status=? WHERE id=?
-            refreshPay();
+            return KK.api('admin', 'verifikasi_bayar', { id: id, status: status }).then(function () {
+                byId(pay, id).status = status;
+                refreshPay();
+            });
         }
 
         function refreshPay() {
@@ -92,7 +98,8 @@
             selectedId = id;
             selectRow('#pay-body', $('#pay-body tr[data-pay="' + id + '"]'));
             $('#pay-panel').innerHTML =
-                '<div class="proof' + (p.bukti ? '' : ' is-empty') + '"><strong>Bukti transfer</strong><span>' + KK.esc(p.bukti || 'Belum ada bukti') + '</span></div>' +
+                '<div class="proof' + (p.bukti ? '' : ' is-empty') + '"><strong>Bukti transfer</strong><span>' + buktiHtml(p.bukti) + '</span></div>' +
+                '<div class="kv-item"><small>Periode</small><strong>' + KK.esc(p.periode || '-') + '</strong></div>' +
                 '<div class="kv">' +
                 '<div class="kv-item"><small>Penghuni</small><strong>' + KK.esc(p.nama) + ' · ' + KK.esc(p.kamar) + '</strong></div>' +
                 '<div class="kv-item"><small>Jumlah</small><strong>' + KK.rupiah(p.jumlah) + '</strong></div>' +
@@ -123,9 +130,10 @@
                 text: 'Pembayaran ' + p.nama + ' (Kamar ' + p.kamar + ') sebesar ' + KK.rupiah(p.jumlah) + ' akan ditandai Lunas.',
                 okText: 'Ya, Terima',
                 onOk: function () {
-                    setPay(currentId, 'lunas');
-                    KK.closeModal('modal-verif');
-                    KK.toast('Pembayaran diterima. Status: Lunas', 'success');
+                    setPay(currentId, 'lunas').then(function () {
+                        KK.closeModal('modal-verif');
+                        KK.toast('Pembayaran diterima. Status: Lunas', 'success');
+                    }).catch(fail);
                 }
             });
         });
@@ -137,9 +145,10 @@
                 text: 'Penghuni ' + p.nama + ' akan diminta mengirim ulang bukti transfer.',
                 okText: 'Ya, Tolak', okClass: 'btn-danger',
                 onOk: function () {
-                    setPay(currentId, 'ditolak');
-                    KK.closeModal('modal-verif');
-                    KK.toast('Bukti ditolak. Penghuni diminta mengirim ulang.');
+                    setPay(currentId, 'ditolak').then(function () {
+                        KK.closeModal('modal-verif');
+                        KK.toast('Bukti ditolak. Penghuni diminta mengirim ulang.');
+                    }).catch(fail);
                 }
             });
         });
@@ -157,7 +166,9 @@
             currentId = id;
             $('#ma-sub').textContent = 'Kamar ' + a.kamar + ' · ' + a.deskripsi;
             $('#ma-tgl').textContent = KK.fmtDate(a.tgl);
-            $('#ma-foto').textContent = a.foto + ' foto';
+            $('#ma-foto').innerHTML = a.foto_file
+                ? '<a class="link" href="' + KK.esc(berkas(a.foto_file)) + '" target="_blank" rel="noopener">Lihat foto</a>'
+                : 'Tidak ada foto';
             $('#ma-status').value = a.status;
             $('#ma-catatan').value = '';
             KK.openModal('modal-aduan');
@@ -191,11 +202,13 @@
         $('#aduan-status-form').addEventListener('submit', function (e) {
             e.preventDefault();
             var a = byId(list, currentId);
-            a.status = $('#ma-status').value;
-            // TODO (database): UPDATE pengaduan SET status=?, catatan=? WHERE id=?
-            refresh();
-            KK.closeModal('modal-aduan');
-            KK.toast('Status pengaduan diubah menjadi ' + KK.label('aduan', a.status), 'success');
+            var status = $('#ma-status').value;
+            KK.api('admin', 'ubah_aduan', { id: currentId, status: status, catatan: $('#ma-catatan').value }).then(function () {
+                a.status = status;
+                refresh();
+                KK.closeModal('modal-aduan');
+                KK.toast('Status pengaduan diubah menjadi ' + KK.label('aduan', a.status), 'success');
+            }).catch(fail);
         });
     }
 
@@ -235,15 +248,16 @@
         }
 
         function setStatus(id, status) {
-            var b = byId(list, id);
-            b.status = status;
-            // TODO (database): UPDATE booking SET status=? WHERE id=?  (+ ubah status kamar)
-            var tr = $('#booking-body tr[data-booking="' + id + '"]');
-            tr.dataset.status = status;
-            $('.col-status', tr).innerHTML = KK.badge('booking', status);
-            stats();
-            refilter('.chips[data-filter-target="#booking-body"]');
-            render(id);
+            return KK.api('admin', 'ubah_booking', { id: id, status: status }).then(function () {
+                var b = byId(list, id);
+                b.status = status;
+                var tr = $('#booking-body tr[data-booking="' + id + '"]');
+                tr.dataset.status = status;
+                $('.col-status', tr).innerHTML = KK.badge('booking', status);
+                stats();
+                refilter('.chips[data-filter-target="#booking-body"]');
+                render(id);
+            });
         }
 
         document.addEventListener('click', function (e) {
@@ -254,9 +268,9 @@
                 var b = byId(list, selectedId);
                 KK.confirm({
                     type: 'success', title: 'Konfirmasi booking?',
-                    text: 'Kamar ' + b.kamar + ' untuk ' + b.nama + ' ditahan dan statusnya menjadi Booking. Buat akun penghuni saat dia masuk.',
+                    text: 'Kamar ' + b.kamar + ' untuk ' + b.nama + ' ditahan dan statusnya menjadi Booking. Buat akun penghuni di menu Penghuni saat dia masuk.',
                     okText: 'Ya, Konfirmasi',
-                    onOk: function () { setStatus(selectedId, 'dikonfirmasi'); KK.toast('Booking dikonfirmasi', 'success'); }
+                    onOk: function () { setStatus(selectedId, 'dikonfirmasi').then(function () { KK.toast('Booking dikonfirmasi', 'success'); }).catch(fail); }
                 });
             }
             if (e.target.closest('#bk-no')) {
@@ -265,7 +279,7 @@
                     type: 'danger', title: 'Tolak booking ini?',
                     text: 'Kamar ' + c.kamar + ' akan kembali tersedia untuk calon penghuni lain.',
                     okText: 'Ya, Tolak', okClass: 'btn-danger',
-                    onOk: function () { setStatus(selectedId, 'ditolak'); KK.toast('Booking ditolak'); }
+                    onOk: function () { setStatus(selectedId, 'ditolak').then(function () { KK.toast('Booking ditolak'); }).catch(fail); }
                 });
             }
         });
@@ -348,15 +362,16 @@
             }
 
             function setStatus(id, status) {
-                var x = byId(list, id);
-                x.status = status;
-                // TODO (database): UPDATE kunjungan / survey SET status=? WHERE id=?
-                var tr = $('#' + key + '-body tr[data-' + key + '="' + id + '"]');
-                tr.dataset.status = status;
-                $('.col-status', tr).innerHTML = badge(status);
-                stats();
-                refilter('.chips[data-filter-target="#' + key + '-body"]');
-                render(id);
+                return KK.api('admin', 'ubah_kunjungan', { id: id, status: status }).then(function () {
+                    var x = byId(list, id);
+                    x.status = status;
+                    var tr = $('#' + key + '-body tr[data-' + key + '="' + id + '"]');
+                    tr.dataset.status = status;
+                    $('.col-status', tr).innerHTML = badge(status);
+                    stats();
+                    refilter('.chips[data-filter-target="#' + key + '-body"]');
+                    render(id);
+                });
             }
 
             body.addEventListener('click', function (e) {
@@ -378,8 +393,9 @@
                     okText: batal ? 'Ya, Batalkan' : 'Ya, Lanjutkan',
                     okClass: batal ? 'btn-danger' : undefined,
                     onOk: function () {
-                        setStatus(selectedId, st);
-                        KK.toast('Status ' + noun + ' diubah menjadi ' + LABEL[st], batal ? undefined : 'success');
+                        setStatus(selectedId, st).then(function () {
+                            KK.toast('Status ' + noun + ' diubah menjadi ' + LABEL[st], batal ? undefined : 'success');
+                        }).catch(fail);
                     }
                 });
             });
@@ -396,8 +412,6 @@
         var K = DATA.kamar || {};
         var selected = null;
 
-        function statusLabel(s) { return { kosong: 'Kosong', terisi: 'Terisi', booking: 'Booking', diperbaiki: 'Diperbaiki' }[s]; }
-
         function render(id) {
             var k = K[id];
             selected = id;
@@ -410,15 +424,6 @@
             $('#kp-harga').textContent = KK.rupiah(k.harga) + ' / bulan';
             $('#kp-penghuni').textContent = k.penghuni || '—';
             $('#kp-fasilitas').textContent = k.fasilitas.join(' · ');
-        }
-
-        function paintTile(id) {
-            var k = K[id];
-            $$('[data-room="' + id + '"]').forEach(function (el) {
-                el.className = el.className.replace(/\bst-\w+/g, '').trim() + ' st-' + k.status;
-                var span = $('span', el);
-                span.textContent = el.closest('#modal-denah') ? statusLabel(k.status) : k.tipe;
-            });
         }
 
         document.addEventListener('click', function (e) {
@@ -448,20 +453,23 @@
             var form = e.target;
             if (!KK.validate(form)) return;
             var k = K[selected];
-            k.tipe = $('#u-tipe').value;
-            k.ukuran = $('#u-ukuran').value.trim();
-            k.status = $('#u-status').value;
-            k.harga = parseInt($('#u-harga').value, 10);
-            k.fasilitas = $$('#u-fasilitas input:checked').map(function (cb) { return cb.value; });
-            if (k.status !== 'terisi' && k.penghuni && k.status === 'kosong') k.penghuni = null;
-            // TODO (database): UPDATE kamar SET tipe=?, ukuran=?, status=?, harga=?, fasilitas=? WHERE nomor=?
-            paintTile(selected);
-            render(selected);
-            KK.closeModal('modal-ubah');
-            KK.success('Perubahan Berhasil di Simpan', 'Perubahan data pada kamar ' + k.id + ' sudah berhasil.', 'Kembali');
+            var data = {
+                nomor: selected,
+                tipe: $('#u-tipe').value,
+                ukuran: $('#u-ukuran').value.trim(),
+                status: $('#u-status').value,
+                harga: parseInt($('#u-harga').value, 10),
+                fasilitas: $$('#u-fasilitas input:checked').map(function (cb) { return cb.value; })
+            };
+            KK.api('admin', 'ubah_kamar', data).then(function () {
+                try { sessionStorage.setItem('kk_kamar', selected); } catch (err) {}
+                KK.reloadWith({ title: 'Perubahan Berhasil di Simpan', text: 'Perubahan data pada kamar ' + k.id + ' sudah berhasil.', btn: 'Kembali' });
+            }).catch(fail);
         });
 
-        render(K['A-03'] ? 'A-03' : Object.keys(K)[0]);
+        var awal = null;
+        try { awal = sessionStorage.getItem('kk_kamar'); sessionStorage.removeItem('kk_kamar'); } catch (err) {}
+        render(awal && K[awal] ? awal : (K['A-03'] ? 'A-03' : Object.keys(K)[0]));
     }
 
     /* =====================================================
@@ -474,7 +482,7 @@
         var body = $('#penghuni-body');
         var curKamar = null, curPindah = null;
 
-        var TAGIHAN = { Lunas: 'lunas', Menunggu: 'menunggu', Terlambat: 'terlambat' };
+        var TAGIHAN = { 'Belum Dibayar': 'belum', Lunas: 'lunas', Menunggu: 'menunggu', Terlambat: 'terlambat', Ditolak: 'ditolak' };
 
         function stats() {
             var kosong = Object.keys(K).filter(function (id) { return K[id].status === 'kosong'; }).length;
@@ -486,31 +494,6 @@
             $('#pindah-count').textContent = pend + ' menunggu';
             var empty = $('[data-empty]', body);
             empty.classList.toggle('hidden', $$('tr[data-kamar]', body).length > 0);
-        }
-
-        function rebuildKamarSelect() {
-            var sel = $('#t-kamar');
-            var val = sel.value;
-            sel.innerHTML = '<option value="">Pilih kamar kosong</option>';
-            Object.keys(K).filter(function (id) { return K[id].status === 'kosong'; }).sort().forEach(function (id) {
-                var o = document.createElement('option');
-                o.value = id; o.textContent = id + ' · ' + K[id].tipe;
-                sel.appendChild(o);
-            });
-            sel.value = val;
-        }
-
-        function renumber() {
-            $$('tr[data-kamar]', body).forEach(function (tr, i) { $('.c-no', tr).textContent = i + 1; });
-            P.forEach(function (p, i) { p.no = i + 1; });
-        }
-
-        function rowHtml(p) {
-            return '<td class="c-no">' + p.no + '</td><td class="c-nama">' + KK.esc(p.nama) + '</td><td class="c-kamar">' + KK.esc(p.kamar) + '</td>' +
-                '<td class="c-tipe nowrap">Lantai ' + p.lantai + ' · ' + KK.esc(p.tipe) + '</td>' +
-                '<td class="nowrap">' + short(p.masuk) + '</td><td class="nowrap">' + KK.esc(p.hp) + '</td>' +
-                '<td><div class="actions"><button class="btn btn-outline btn-sm" type="button" data-act="detail">Detail</button>' +
-                '<button class="btn btn-outline btn-sm" type="button" data-act="keluar">Keluarkan</button></div></td>';
         }
 
         function findP(kamar) { return P.filter(function (p) { return p.kamar === kamar; })[0]; }
@@ -529,14 +512,14 @@
                     '<div><span>Kamar</span><strong>' + KK.esc(p.kamar) + ' · Lantai ' + p.lantai + ' · ' + KK.esc(p.tipe) + '</strong></div>' +
                     '<div><span>Tanggal masuk</span><strong>' + KK.fmtDate(p.masuk) + '</strong></div>' +
                     '<div><span>Nomor HP</span><strong>' + KK.esc(p.hp) + '</strong></div>' +
-                    '<div><span>Tagihan terakhir</span><strong>' + KK.badge('bayar', TAGIHAN[p.tagihan] || 'menunggu') + '</strong></div>' +
+                    '<div><span>Tagihan terakhir</span><strong>' + (TAGIHAN[p.tagihan] ? KK.badge('bayar', TAGIHAN[p.tagihan]) : '-') + '</strong></div>' +
                     '<div><span>Pengaduan aktif</span><strong>' + (p.aduan || 0) + '</strong></div>';
                 KK.openModal('modal-detail');
             }
             if (btn.dataset.act === 'keluar') {
                 curKamar = p.kamar;
                 $('#mk-sub').textContent = p.nama + ' · Kamar ' + p.kamar + '. Dipakai saat penghuni berhenti atau kontrak selesai.';
-                $('#mk-tagihan').innerHTML = KK.badge('bayar', TAGIHAN[p.tagihan] || 'menunggu');
+                $('#mk-tagihan').innerHTML = (TAGIHAN[p.tagihan] ? KK.badge('bayar', TAGIHAN[p.tagihan]) : '-');
                 $('#mk-deposit').textContent = KK.rupiah(p.deposit);
                 $('#k-tgl').value = KK.today();
                 $('#k-kondisi').value = 'baik';
@@ -556,20 +539,15 @@
             e.preventDefault();
             if (!KK.validate(e.target)) return;
             var p = findP(curKamar);
-            var baik = $('#k-kondisi').value === 'baik';
+            var kamar = curKamar, tgl = $('#k-tgl').value, kondisi = $('#k-kondisi').value;
             KK.confirm({
                 type: 'warn', title: 'Keluarkan ' + p.nama + '?',
                 text: 'Akun penghuni akan dinonaktifkan. Pastikan deposit sudah diselesaikan.',
                 okText: 'Ya, Keluarkan',
                 onOk: function () {
-                    // TODO (database): nonaktifkan akun, UPDATE kamar SET status=?, catat tanggal keluar
-                    P.splice(P.indexOf(p), 1);
-                    $('tr[data-kamar="' + p.kamar + '"]', body).remove();
-                    K[p.kamar].status = baik ? 'kosong' : 'diperbaiki';
-                    K[p.kamar].penghuni = null;
-                    renumber(); rebuildKamarSelect(); stats();
-                    KK.closeModal('modal-keluar');
-                    KK.toast(p.nama + ' sudah dikeluarkan dari kamar ' + p.kamar, 'success');
+                    KK.api('admin', 'keluarkan_penghuni', { kamar: kamar, tgl: tgl, kondisi: kondisi }).then(function () {
+                        KK.reloadWith({ toast: p.nama + ' sudah dikeluarkan dari kamar ' + kamar, type: 'success' });
+                    }).catch(fail);
                 }
             });
         });
@@ -581,36 +559,21 @@
             var form = e.target;
             if (!KK.validate(form)) return;
             var f = new FormData(form);
-            var id = f.get('kamar');
-            if (!K[id] || K[id].status !== 'kosong') { KK.toast('Kamar tidak tersedia', 'error'); return; }
-
-            var p = {
-                no: P.length + 1, nama: String(f.get('nama')).trim(), kamar: id, lantai: K[id].lantai, tipe: K[id].tipe,
-                harga: K[id].harga, masuk: f.get('tgl'), hp: String(f.get('hp')).trim(), tagihan: 'Menunggu', aduan: 0, deposit: K[id].harga
-            };
-            // TODO (database): INSERT user (password_hash) + penghuni, UPDATE kamar status='terisi'
-            P.push(p);
-            K[id].status = 'terisi'; K[id].penghuni = p.nama;
-            var tr = document.createElement('tr');
-            tr.dataset.kamar = id;
-            tr.innerHTML = rowHtml(p);
-            body.insertBefore(tr, $('[data-empty]', body));
-            rebuildKamarSelect(); stats();
-            KK.closeModal('modal-tambah');
-            KK.success('Penghuni ditambahkan', 'Akun "' + f.get('username') + '" dibuat dan ' + p.nama + ' ditempatkan di kamar ' + id + '.', 'Tutup');
-            KK.resetForm(form);
-            $('#t-tgl').value = KK.today();
+            var btn = $('button[type=submit]', form);
+            btn.disabled = true;
+            KK.api('admin', 'tambah_penghuni', {
+                nama: String(f.get('nama')).trim(), hp: String(f.get('hp')).trim(),
+                username: String(f.get('username')).trim(), password: f.get('password'),
+                kamar: f.get('kamar'), tgl: f.get('tgl')
+            }).then(function () {
+                KK.reloadWith({
+                    title: 'Penghuni ditambahkan',
+                    text: 'Akun "' + String(f.get('username')).trim() + '" dibuat dan ' + String(f.get('nama')).trim() + ' ditempatkan di kamar ' + f.get('kamar') + '. Berikan username dan password ke penghuni.'
+                });
+            }).catch(function (err) { btn.disabled = false; fail(err); });
         });
 
         /* ---- pindah kamar ---- */
-        function refreshPindah(p) {
-            var tr = $('#pindah-body tr[data-pindah="' + p.id + '"]');
-            tr.dataset.status = p.status;
-            $('.col-status', tr).innerHTML = KK.badge('pindah', p.status);
-            $('.col-aksi', tr).textContent = '-';
-            stats();
-        }
-
         $('#pindah-body').addEventListener('click', function (e) {
             var btn = e.target.closest('[data-act]');
             if (!btn) return;
@@ -627,20 +590,9 @@
                         '. Kamar ' + p.asal + ' menjadi kosong.',
                     okText: 'Ya, Setujui',
                     onOk: function () {
-                        // TODO (database): UPDATE penghuni SET kamar=?, UPDATE kamar status (asal=kosong, tujuan=terisi)
-                        p.status = 'selesai';
-                        K[p.asal].status = 'kosong'; K[p.asal].penghuni = null;
-                        K[p.tujuan].status = 'terisi'; K[p.tujuan].penghuni = p.nama;
-                        var ph = findP(p.asal);
-                        if (ph) {
-                            ph.kamar = p.tujuan; ph.lantai = K[p.tujuan].lantai; ph.tipe = K[p.tujuan].tipe; ph.harga = K[p.tujuan].harga;
-                            var tr = $('tr[data-kamar="' + p.asal + '"]', body);
-                            tr.dataset.kamar = p.tujuan;
-                            $('.c-kamar', tr).textContent = p.tujuan;
-                            $('.c-tipe', tr).textContent = 'Lantai ' + ph.lantai + ' · ' + ph.tipe;
-                        }
-                        refreshPindah(p); rebuildKamarSelect();
-                        KK.toast('Pindah kamar disetujui', 'success');
+                        KK.api('admin', 'proses_pindah', { id: p.id }).then(function () {
+                            KK.reloadWith({ toast: 'Pindah kamar disetujui', type: 'success' });
+                        }).catch(fail);
                     }
                 });
             }
@@ -654,12 +606,9 @@
         $('#tolak-form').addEventListener('submit', function (e) {
             e.preventDefault();
             if (!KK.validate(e.target)) return;
-            var p = byId(PIN, curPindah);
-            // TODO (database): UPDATE pindah_kamar SET status='ditolak', alasan_tolak=?
-            p.status = 'ditolak';
-            refreshPindah(p);
-            KK.closeModal('modal-tolak');
-            KK.toast('Pengajuan pindah ditolak');
+            KK.api('admin', 'tolak_pindah', { id: curPindah, alasan: $('#tl-alasan').value }).then(function () {
+                KK.reloadWith({ toast: 'Pengajuan pindah ditolak' });
+            }).catch(fail);
         });
 
         stats();

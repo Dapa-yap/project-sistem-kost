@@ -16,60 +16,16 @@ $activeMenu = 'jadwal';
  * =========================================================
  */
 
-$kunjungan = get_kunjungan();
+$kunjungan = get_kunjungan('kunjungan');
 
 
 /*
  * =========================================================
- * DATA SURVEY
- *
- * Saat ini masih prototype/frontend.
- * Belum menggunakan database.
+ * DATA SURVEY (jadwal survei kamar dari halaman detail kamar)
  * =========================================================
  */
 
-$survey = [
-    [
-        'id' => 1,
-        'nama' => 'Budi Santoso',
-        'hp' => '0812-1111-2222',
-        'kamar' => 'A-03',
-        'tanggal' => '2026-10-14',
-        'jam' => '10:00',
-        'catatan' => 'Ingin melakukan survey kamar sebelum booking.',
-        'status' => 'menunggu',
-    ],
-    [
-        'id' => 2,
-        'nama' => 'Sinta Maharani',
-        'hp' => '0857-2222-3333',
-        'kamar' => 'B-02',
-        'tanggal' => '2026-10-15',
-        'jam' => '13:00',
-        'catatan' => 'Ingin mengetahui fasilitas kamar.',
-        'status' => 'dikonfirmasi',
-    ],
-    [
-        'id' => 3,
-        'nama' => 'Doni Pratama',
-        'hp' => '0896-3333-4444',
-        'kamar' => 'A-05',
-        'tanggal' => '2026-10-12',
-        'jam' => '15:00',
-        'catatan' => 'Survey sudah dilakukan.',
-        'status' => 'selesai',
-    ],
-    [
-        'id' => 4,
-        'nama' => 'Rina Amelia',
-        'hp' => '0813-4444-5555',
-        'kamar' => 'B-04',
-        'tanggal' => '2026-10-11',
-        'jam' => '11:00',
-        'catatan' => '',
-        'status' => 'dibatalkan',
-    ],
-];
+$survey = get_kunjungan('survey');
 
 
 $pageData = [
@@ -320,7 +276,7 @@ include ROOT_PATH . '/header/header.php';
                                             </td>
 
                                             <td>
-                                                <?= e($k['kamar']) ?>
+                                                <?= e($k['kamar'] ?: '-') ?>
                                             </td>
 
                                             <td class="nowrap">
@@ -579,7 +535,7 @@ include ROOT_PATH . '/header/header.php';
                                             </td>
 
                                             <td>
-                                                <?= e($s['kamar']) ?>
+                                                <?= e($s['kamar'] ?: '-') ?>
                                             </td>
 
                                             <td class="nowrap">

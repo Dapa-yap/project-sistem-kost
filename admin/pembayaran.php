@@ -24,18 +24,18 @@ include ROOT_PATH . '/header/header.php';
                     <button class="chip" data-filter="terlambat">Terlambat</button>
                 </div>
                 <div class="card">
-                    <div class="card-head"><h2>Daftar Tagihan · Okt 2026</h2></div>
+                    <div class="card-head"><h2>Daftar Tagihan</h2></div>
                     <div class="table-wrap"><table class="table">
-                        <thead><tr><th>Penghuni</th><th>Kamar</th><th>Jumlah</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
+                        <thead><tr><th>Penghuni</th><th>Kamar</th><th>Periode</th><th>Jumlah</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
                         <tbody id="pay-body">
                             <?php foreach ($pay as $p): ?>
                                 <tr class="is-clickable" data-pay="<?= (int) $p['id'] ?>" data-status="<?= e($p['status']) ?>">
-                                    <td><?= e($p['nama']) ?></td><td><?= e($p['kamar']) ?></td>
+                                    <td><?= e($p['nama']) ?></td><td><?= e($p['kamar']) ?></td><td class="nowrap"><?= e($p['periode']) ?></td>
                                     <td class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td><td class="nowrap"><?= e(tgl($p['jatuh_tempo'])) ?></td>
                                     <td class="col-status"><?= status_badge('bayar', $p['status']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
-                            <tr data-empty class="empty-row hidden"><td colspan="5">Tidak ada tagihan pada kategori ini.</td></tr>
+                            <tr data-empty class="empty-row hidden"><td colspan="6">Tidak ada tagihan pada kategori ini.</td></tr>
                         </tbody>
                     </table></div>
                 </div>

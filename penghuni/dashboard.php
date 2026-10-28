@@ -9,9 +9,13 @@ $kamar   = get_kamar_by_id($user['kamar']);
 $penghuniRow = null;
 foreach (get_penghuni() as $p) { if ($p['kamar'] === $user['kamar']) { $penghuniRow = $p; } }
 $tagihan = get_tagihan_penghuni();
+// tagihan tertua yang belum beres (daftar diurutkan terbaru -> terlama)
 $next = null;
-foreach ($tagihan as $t) { if ($t['status'] === 'belum') { $next = $t; break; } }
-$tagihanBulanIni = $tagihan[1] ?? null; // bulan berjalan (Okt 2026)
+foreach ($tagihan as $t) { if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)) { $next = $t; } }
+// tagihan siklus berjalan = yang tanggalnya paling baru tetapi tidak di masa depan
+$tagihanBulanIni = null;
+foreach ($tagihan as $t) { if ($t['tgl_tagihan'] <= date('Y-m-d')) { $tagihanBulanIni = $t; break; } }
+$pindahAktif = get_pindah_penghuni();
 $aduanAktif = array_values(array_filter(get_pengaduan_penghuni(), fn($a) => $a['status'] !== 'selesai'));
 $namaDepan = explode(' ', $user['nama'])[0];
 
@@ -61,7 +65,7 @@ include ROOT_PATH . '/header/header.php';
                         <div><span>Nomor kamar</span><strong><?= e($kamar['id']) ?></strong></div>
                         <div><span>Tipe dan ukuran</span><strong><?= e($kamar['tipe']) ?> · <?= e($kamar['ukuran']) ?></strong></div>
                         <div><span>Harga sewa</span><strong><?= e(rupiah($kamar['harga'])) ?> / bulan</strong></div>
-                        <div><span>Tanggal masuk</span><strong><?= e(tgl($penghuniRow['masuk'] ?? '2026-01-03', false)) ?></strong></div>
+                        <div><span>Tanggal masuk</span><strong><?= e(tgl($penghuniRow['masuk'] ?? date('Y-m-d'), false)) ?></strong></div>
                         <div><span>Tagihan bulan ini</span>
                             <strong><?= $tagihanBulanIni && $tagihanBulanIni['status'] === 'lunas' ? '<span class="status-inline">Lunas</span>' : '<span class="status-inline is-warn">' . e($tagihanBulanIni ? strip_tags(status_badge('bayar', $tagihanBulanIni['status'])) : '-') . '</span>' ?></strong>
                         </div>
@@ -71,7 +75,13 @@ include ROOT_PATH . '/header/header.php';
                 <div class="card move-card">
                     <h2>Pindah Kamar</h2>
                     <p>Ingin pindah ke kamar lain? Ajukan ke pengelola. Kamar tujuan harus kosong dan tagihan bulan ini lunas.</p>
-                    <button class="btn btn-accent btn-block" type="button" data-open="modal-pindah">Ajukan Pindah Kamar</button>
+                    <?php $ps = $pindahAktif ? norm_status($pindahAktif['status']) : null; ?>
+                    <?php if ($ps === 'menunggu'): ?>
+                        <div class="alert alert-info">Pengajuan pindah ke kamar <?= e($pindahAktif['tujuan']) ?> (<?= e(tgl($pindahAktif['tanggal'])) ?>) sedang ditinjau pengelola.</div>
+                    <?php else: ?>
+                        <?php if ($ps === 'ditolak'): ?><div class="alert alert-warn">Pengajuan pindah ke kamar <?= e($pindahAktif['tujuan']) ?> ditolak<?= $pindahAktif['alasan_tolak'] ? ': ' . e($pindahAktif['alasan_tolak']) : '' ?>.</div><?php endif; ?>
+                        <button class="btn btn-accent btn-block" type="button" data-open="modal-pindah">Ajukan Pindah Kamar</button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

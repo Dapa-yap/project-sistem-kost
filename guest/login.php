@@ -18,16 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // TODO (database): ganti dengan SELECT ... WHERE username=? lalu password_verify()
-    foreach (get_users() as $u) {
-        if ($u['role'] === $tab && $u['username'] === $username && $u['password'] === $password) {
+    if (!throttle_ok('login', 8, 10)) {
+        $error = 'Terlalu banyak percobaan masuk. Coba lagi dalam beberapa menit.';
+    } else {
+        $u = find_user($username, $password, $tab);
+        if ($u) {
             session_regenerate_id(true);
             $_SESSION['user'] = $u;
-            unset($_SESSION['user']['password']);
+            unset($_SESSION['throttle']['login']);
             redirect($tab === 'admin' ? 'admin/dashboard.php' : 'penghuni/dashboard.php');
         }
+        throttle_hit('login');
+        $error = 'Username atau password salah, atau peran yang dipilih tidak sesuai.';
     }
-    $error = 'Username atau password salah, atau peran yang dipilih tidak sesuai.';
 }
 
 include ROOT_PATH . '/header/header.php';
@@ -67,13 +70,7 @@ include ROOT_PATH . '/header/header.php';
             <button class="btn btn-accent btn-block" type="submit">Masuk</button>
         </form>
 
-        <p class="auth-foot" id="login-foot">Belum punya akun? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
-
-        <div class="demo-box">
-            <strong>Akun demo (sementara, sebelum database):</strong><br>
-            Penghuni: <code>rina</code> / <code>rina12345</code><br>
-            Pengelola: <code>admin</code> / <code>admin123</code>
-        </div>
+        <p class="auth-foot" id="login-foot">Akun penghuni dibuat oleh pengelola setelah booking disetujui. Belum punya kamar? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
     </div>
 </main>
 

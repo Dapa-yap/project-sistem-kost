@@ -6,7 +6,7 @@ $role = 'penghuni'; $pageTitle = 'Pembayaran'; $pageId = 'penghuni-pembayaran'; 
 
 $tagihan = get_tagihan_penghuni();
 $aktif = null;
-foreach ($tagihan as $t) { if ($t['status'] === 'belum') { $aktif = $t; break; } }
+foreach ($tagihan as $t) { if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)) { $aktif = $t; } }   // tertua yang belum beres
 $lunas = array_filter($tagihan, fn($t) => $t['status'] === 'lunas');
 $totalLunas = array_sum(array_column($lunas, 'jumlah'));
 $sisaHari = $aktif ? max(0, (int) ceil((strtotime($aktif['jatuh_tempo']) - strtotime(date('Y-m-d'))) / 86400)) : null;
@@ -64,9 +64,9 @@ include ROOT_PATH . '/header/header.php';
                                 <td class="nowrap"><?= e(tgl($t['jatuh_tempo'])) ?></td>
                                 <td class="nowrap"><?= e(rupiah($t['jumlah'])) ?></td>
                                 <td class="col-status"><?= status_badge('bayar', $t['status']) ?></td>
-                                <td class="bukti"><?= $t['bukti'] ? '<span class="file">' . e($t['bukti']) . '</span>' : '—' ?></td>
+                                <td class="bukti"><?= $t['bukti'] ? '<a class="file" target="_blank" rel="noopener" href="' . e(url('api/berkas.php?f=' . urlencode($t['bukti']))) . '">Lihat foto</a>' : '—' ?></td>
                                 <td class="col-aksi"><div class="actions">
-                                    <?php if ($t['status'] === 'belum'): ?>
+                                    <?php if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)): ?>
                                         <button class="btn btn-outline btn-sm" type="button" data-act="bukti">Kirim Bukti</button>
                                         <button class="btn btn-accent btn-sm" type="button" data-act="bayar">Bayar</button>
                                     <?php else: ?>
@@ -83,44 +83,26 @@ include ROOT_PATH . '/header/header.php';
     </section>
 </main>
 
-<!-- Modal: pilih cara bayar -->
-<div class="modal-overlay" id="modal-bayar">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mby-title">
+<!-- Modal: transfer ke rekening -->
+<div class="modal-overlay" id="modal-rekening">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mrk-title">
         <div class="modal-head">
             <div>
-                <h3 id="mby-title">Bayar tagihan</h3>
-                <p>Pilih cara bayar. Status berubah Lunas otomatis setelah pembayaran masuk.</p>
+                <h3 id="mrk-title">Bayar tagihan</h3>
+                <p id="mrk-sub">Transfer sesuai jumlah, lalu unggah bukti transfer.</p>
             </div>
             <button class="modal-x" type="button" data-close aria-label="Tutup"><?= icon('x', 16) ?></button>
         </div>
+        <div class="field-label" style="margin-bottom:8px">Transfer ke rekening <?= e(BANK_NAMA) ?></div>
+        <div class="va-number"><strong id="mrk-number"><?= e(BANK_REKENING) ?></strong><button type="button" id="mrk-copy">Salin</button></div>
         <div class="modal-info">
-            <div><span>Total bayar</span><strong id="mby-total">-</strong></div>
-            <div><span>Jatuh tempo</span><strong id="mby-tempo">-</strong></div>
+            <div><span>Atas nama</span><strong><?= e(BANK_ATAS_NAMA) ?></strong></div>
+            <div><span>Jumlah transfer</span><strong id="mrk-total">-</strong></div>
+            <div><span>Bayar sebelum</span><strong id="mrk-tempo">-</strong></div>
         </div>
-        <label class="radio-card"><input type="radio" name="cara" value="va-bni" id="mby-va"> Virtual Account · BNI</label>
         <div class="modal-foot">
-            <button class="btn btn-accent" type="button" id="mby-go">Bayar Sekarang</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Virtual Account -->
-<div class="modal-overlay" id="modal-va">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mva-title">
-        <div class="modal-head">
-            <div>
-                <h3 id="mva-title">Bayar lewat Virtual Account BNI</h3>
-                <p id="mva-sub">-</p>
-            </div>
-            <button class="modal-x" type="button" data-close aria-label="Tutup"><?= icon('x', 16) ?></button>
-        </div>
-        <div class="field-label" style="margin-bottom:8px">Nomor Virtual Account BNI</div>
-        <div class="va-number"><strong id="mva-number">-</strong><button type="button" id="mva-copy">Salin</button></div>
-        <ol class="steps" id="mva-steps"></ol>
-        <div class="modal-info"><div><span>Bayar sebelum</span><strong id="mva-batas">-</strong></div></div>
-        <div class="modal-foot">
-            <button class="btn btn-ghost" type="button" id="mva-upload">Unggah Bukti</button>
             <button class="btn btn-outline" type="button" data-close>Tutup</button>
+            <button class="btn btn-accent" type="button" id="mrk-upload">Unggah Bukti</button>
         </div>
     </div>
 </div>
@@ -139,7 +121,7 @@ include ROOT_PATH . '/header/header.php';
             <div class="modal-info">
                 <div><span>Jumlah</span><strong id="mbk-jumlah">-</strong></div>
                 <div><span>Jatuh tempo</span><strong id="mbk-tempo">-</strong></div>
-                <div><span>Transfer ke</span><strong>BCA 123 456 7890 · KostKu</strong></div>
+                <div><span>Transfer ke</span><strong><?= e(BANK_NAMA . ' ' . BANK_REKENING . ' · ' . BANK_ATAS_NAMA) ?></strong></div>
             </div>
             <div class="field">
                 <label class="dropzone" tabindex="0" id="mbk-drop" data-max-mb="5">

@@ -358,6 +358,45 @@
         KK.$$('.chips[data-filter-target]').forEach(applyChipFilter);
     });
 
+    /* ---------- Panggilan ke server (api/*.php) ----------
+       KK.api('admin', 'verifikasi_bayar', { id: 3, status: 'lunas' })
+         .then(function (res) { ... }).catch(function (err) { KK.toast(err.message, 'error'); });
+       Nilai File / array ikut dikirim. Token CSRF ditambahkan otomatis. */
+    KK.api = function (endpoint, aksi, fields, extra) {
+        var fd = new FormData();
+        fd.append('aksi', aksi);
+        Object.keys(fields || {}).forEach(function (k) {
+            var v = fields[k];
+            if (Array.isArray(v)) v.forEach(function (x) { fd.append(k + '[]', x); });
+            else if (v !== null && v !== undefined) fd.append(k, v);
+        });
+        Object.keys(extra || {}).forEach(function (k) { if (extra[k]) fd.append(k, extra[k]); });
+        var csrf = (window.KOSTKU && window.KOSTKU.csrf) || '';
+        return fetch(KK.url('api/' + endpoint + '.php'), {
+            method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf }
+        }).then(function (r) {
+            return r.json().catch(function () { throw new Error('Respon server tidak dikenali.'); }).then(function (j) {
+                if (r.status === 401) { window.location.href = KK.url('guest/login.php'); throw new Error(j.error || 'Sesi berakhir.'); }
+                if (!j.ok) throw new Error(j.error || 'Terjadi kesalahan.');
+                return j;
+            });
+        }, function () { throw new Error('Tidak dapat terhubung ke server.'); });
+    };
+
+    /* Pesan yang tetap tampil setelah halaman dimuat ulang */
+    KK.flash = function (msg) {
+        try { sessionStorage.setItem('kk_flash', JSON.stringify(msg)); } catch (e) {}
+    };
+    KK.reloadWith = function (msg) { KK.flash(msg); window.location.reload(); };
+    document.addEventListener('DOMContentLoaded', function () {
+        var raw = null;
+        try { raw = sessionStorage.getItem('kk_flash'); sessionStorage.removeItem('kk_flash'); } catch (e) {}
+        if (!raw) return;
+        var m; try { m = JSON.parse(raw); } catch (e) { return; }
+        if (m.title) KK.success(m.title, m.text || '', m.btn || 'Tutup');
+        else if (m.toast) KK.toast(m.toast, m.type);
+    });
+
     /* ---------- Badge status (sama dengan status_badge() di PHP) ---------- */
     var BADGES = {
         kamar:   { kosong: ['Tersedia', 'green'], terisi: ['Terisi', 'grey'], booking: ['Terbooking', 'brown'], diperbaiki: ['Diperbaiki', 'orange'] },

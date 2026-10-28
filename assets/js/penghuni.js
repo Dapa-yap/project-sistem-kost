@@ -1,12 +1,14 @@
 /* =========================================================
    KostKu - penghuni.js
-   Dashboard (pindah kamar), pembayaran (VA BNI + bukti), pengaduan.
+   Dashboard (pindah kamar), pembayaran (bukti transfer), pengaduan. Semua disimpan lewat api/penghuni.php.
    ========================================================= */
 (function () {
     'use strict';
     var $ = KK.$, $$ = KK.$$;
     var page = document.body.dataset.page;
     var DATA = window.KOSTKU_DATA || {};
+    function fail(err) { KK.toast(err && err.message ? err.message : 'Gagal menyimpan', 'error'); }
+    var BISA_BAYAR = ['belum', 'terlambat', 'ditolak'];   // status yang masih boleh bayar / kirim bukti
 
     /* ---------- Dashboard: ajukan pindah kamar ---------- */
     function initDashboard() {
@@ -18,12 +20,13 @@
             e.preventDefault();
             if (!KK.validate(form)) return;
             var f = new FormData(form);
-            // TODO (database): INSERT INTO pindah_kamar (penghuni, kamar_asal, kamar_tujuan, tanggal, alasan, status='menunggu')
-            KK.closeModal('modal-pindah');
-            KK.success('Pengajuan terkirim',
-                'Pengajuan pindah ke kamar ' + f.get('tujuan') + ' pada ' + KK.fmtDate(f.get('tgl')) +
-                ' sudah diterima. Pengelola akan meninjau dan menghubungi Anda.', 'Tutup');
-            KK.resetForm(form);
+            KK.api('penghuni', 'ajukan_pindah', { tujuan: f.get('tujuan'), tgl: f.get('tgl'), alasan: f.get('alasan') }).then(function () {
+                KK.reloadWith({
+                    title: 'Pengajuan terkirim',
+                    text: 'Pengajuan pindah ke kamar ' + f.get('tujuan') + ' pada ' + KK.fmtDate(f.get('tgl')) +
+                        ' sudah diterima. Pengelola akan meninjau dan menghubungi Anda.'
+                });
+            }).catch(fail);
         });
     }
 
@@ -35,18 +38,10 @@
         function rowData(tr) { return JSON.parse(tr.getAttribute('data-row')); }
         function saveRow(tr, d) { tr.setAttribute('data-row', JSON.stringify(d)); }
 
-        // nomor VA contoh, dibuat dari periode supaya konsisten
-        function vaNumber(periode) {
-            var h = 0;
-            for (var i = 0; i < periode.length; i++) h = (h * 31 + periode.charCodeAt(i)) % 100000000;
-            var d = String(h).padStart(8, '0');
-            return '8077 1037 ' + d.slice(0, 4) + ' ' + d.slice(4);
-        }
-
         function refreshStats() {
             var rows = $$('tr[data-row]', body).map(rowData);
             var lunas = rows.filter(function (r) { return r.status === 'lunas'; });
-            var aktif = rows.filter(function (r) { return r.status === 'belum'; })[0];
+            var aktif = rows.filter(function (r) { return BISA_BAYAR.indexOf(r.status) !== -1; }).pop();   // tagihan tertua yang belum beres
             $('#stat-lunas').textContent = KK.rupiah(lunas.reduce(function (a, r) { return a + r.jumlah; }, 0));
             $('#stat-lunas-note').textContent = lunas.length + ' pembayaran lunas';
             if (aktif) {
@@ -67,8 +62,8 @@
         function updateRowUI(tr, d) {
             tr.dataset.status = d.status;
             $('.col-status', tr).innerHTML = KK.badge('bayar', d.status);
-            $('.bukti', tr).innerHTML = d.bukti ? '<span class="file">' + KK.esc(d.bukti) + '</span>' : '—';
-            $('.col-aksi', tr).innerHTML = '<div class="actions">' + (d.status === 'belum'
+            $('.bukti', tr).innerHTML = d.bukti ? '<a class="file" target="_blank" rel="noopener" href="' + KK.esc(KK.url('api/berkas.php?f=' + encodeURIComponent(d.bukti))) + '">Lihat foto</a>' : '—';
+            $('.col-aksi', tr).innerHTML = '<div class="actions">' + (BISA_BAYAR.indexOf(d.status) !== -1
                 ? '<button class="btn btn-outline btn-sm" type="button" data-act="bukti">Kirim Bukti</button><button class="btn btn-accent btn-sm" type="button" data-act="bayar">Bayar</button>'
                 : '<button class="btn btn-outline btn-sm" type="button" data-act="detail">Detail</button>') + '</div>';
             KK.applyChipFilter($('.chips[data-filter-target="#pay-body"]'));
@@ -77,11 +72,10 @@
         function openBayar(tr) {
             current = tr;
             var d = rowData(tr);
-            $('#mby-title').textContent = 'Bayar tagihan ' + d.periode;
-            $('#mby-total').textContent = KK.rupiah(d.jumlah);
-            $('#mby-tempo').textContent = KK.fmtDate(d.jatuh_tempo);
-            $('#mby-va').checked = false;
-            KK.openModal('modal-bayar');
+            $('#mrk-title').textContent = 'Bayar tagihan ' + d.periode;
+            $('#mrk-total').textContent = KK.rupiah(d.jumlah);
+            $('#mrk-tempo').textContent = KK.fmtDate(d.jatuh_tempo);
+            KK.openModal('modal-rekening');
         }
 
         function openBukti(tr) {
@@ -118,24 +112,8 @@
             else if (act === 'detail') openDetail(tr);
         });
 
-        // Pilih cara bayar -> tampilkan nomor VA
-        $('#mby-go').addEventListener('click', function () {
-            if (!$('#mby-va').checked) { KK.toast('Pilih cara bayar dulu', 'error'); return; }
-            var d = rowData(current);
-            // TODO (database/payment gateway): minta VA dari gateway untuk tagihan ini
-            $('#mva-sub').textContent = d.periode + ' · ' + KK.rupiah(d.jumlah);
-            $('#mva-number').textContent = vaNumber(d.periode);
-            $('#mva-batas').textContent = KK.fmtDate(d.jatuh_tempo) + ', 23.59 WIB';
-            $('#mva-steps').innerHTML =
-                '<li>Buka m-banking BNI atau ATM.</li>' +
-                '<li>Pilih Transfer, lalu Virtual Account.</li>' +
-                '<li>Masukkan nomor di atas. Jumlah ' + KK.rupiah(d.jumlah) + ' terisi otomatis.</li>';
-            KK.closeModal('modal-bayar');
-            KK.openModal('modal-va');
-        });
-
-        $('#mva-copy').addEventListener('click', function () {
-            var no = $('#mva-number').textContent;
+        $('#mrk-copy').addEventListener('click', function () {
+            var no = $('#mrk-number').textContent.replace(/\s+/g, '');
             var el = document.createElement('span');
             el.setAttribute('data-copy', no);
             document.body.appendChild(el);
@@ -143,8 +121,8 @@
             el.remove();
         });
 
-        $('#mva-upload').addEventListener('click', function () {
-            KK.closeModal('modal-va');
+        $('#mrk-upload').addEventListener('click', function () {
+            KK.closeModal('modal-rekening');
             openBukti(current);
         });
 
@@ -155,20 +133,23 @@
             var input = form.querySelector('input[type=file]');
             if (!input.files.length) { KK.toast('Pilih foto bukti pembayaran dulu', 'error'); return; }
             var d = rowData(current);
-            // TODO (database): upload file ke server, UPDATE pembayaran SET status='menunggu', bukti=...
-            d.status = 'menunggu';
-            d.bukti = input.files[0].name;
-            saveRow(current, d);
-            updateRowUI(current, d);
-            refreshStats();
-            KK.closeModal('modal-bukti');
-            KK.success('Bukti terkirim', 'Pembayaran ' + d.periode + ' sedang menunggu verifikasi pengelola.', 'Tutup');
-            KK.resetForm(form);
+            var btn = $('button[type=submit]', form);
+            btn.disabled = true;
+            KK.api('penghuni', 'kirim_bukti', { id: d.id }, { bukti: input.files[0] }).then(function (res) {
+                d.status = 'menunggu';
+                d.bukti = res.bukti;
+                saveRow(current, d);
+                updateRowUI(current, d);
+                refreshStats();
+                KK.closeModal('modal-bukti');
+                KK.success('Bukti terkirim', 'Pembayaran ' + d.periode + ' sedang menunggu verifikasi pengelola.', 'Tutup');
+                KK.resetForm(form);
+            }).catch(fail).then(function () { btn.disabled = false; });
         });
 
         // Dibuka dari dashboard: pembayaran.php?bayar=Nov%202026
         if (DATA.bukaBayar) {
-            var tr = $$('tr[data-periode]', body).filter(function (r) { return r.dataset.periode === DATA.bukaBayar && r.dataset.status === 'belum'; })[0];
+            var tr = $$('tr[data-periode]', body).filter(function (r) { return r.dataset.periode === DATA.bukaBayar && BISA_BAYAR.indexOf(r.dataset.status) !== -1; })[0];
             if (tr) openBayar(tr);
         }
     }
@@ -180,20 +161,11 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (!KK.validate(form)) return;
-            var text = $('#a-desk').value.trim();
-            var judul = text.length > 48 ? text.slice(0, 48).trim() + '…' : text;
-            var d = new Date();
-            var iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-
-            // TODO (database): INSERT INTO pengaduan (...) + simpan foto
-            var item = document.createElement('div');
-            item.className = 'list-item';
-            item.innerHTML = '<div class="row"><strong>' + KK.esc(judul) + '</strong>' + KK.badge('aduan', 'diajukan') + '</div>' +
-                '<small>Dilaporkan ' + KK.fmtDate(iso).replace(/(\w{3})\w*/, '$1') + ' · Menunggu ditinjau pengelola</small>';
-            list.insertBefore(item, list.firstChild);
-
-            KK.resetForm(form);
-            KK.success('Pengaduan terkirim', 'Pengelola akan meninjau laporan Anda. Status bisa dipantau di Riwayat Pengaduan.', 'Tutup');
+            var btn = $('button[type=submit]', form);
+            btn.disabled = true;
+            KK.api('penghuni', 'buat_aduan', { deskripsi: $('#a-desk').value.trim() }, { foto: (form.querySelector('input[type=file]').files || [])[0] }).then(function () {
+                KK.reloadWith({ title: 'Pengaduan terkirim', text: 'Pengelola akan meninjau laporan Anda. Status bisa dipantau di Riwayat Pengaduan.' });
+            }).catch(function (err) { btn.disabled = false; fail(err); });
         });
     }
 

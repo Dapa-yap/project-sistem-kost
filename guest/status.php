@@ -3,7 +3,8 @@ require_once __DIR__ . '/../config/config.php';
 
 $role = 'guest'; $pageTitle = 'Status Pengajuan'; $pageId = 'guest-status'; $activeMenu = 'status';
 
-$b = $_SESSION['booking_guest'] ?? null;
+kedaluwarsakan_booking();
+$b = !empty($_SESSION['booking_guest']) ? get_booking_by_id($_SESSION['booking_guest']) : null;
 $k = $b ? get_kamar_by_id($b['kamar']) : null;
 
 // Tampilan per status
@@ -19,8 +20,8 @@ $states = [
         'emoji' => '✅', 'tone' => 'ok', 'judul' => 'Booking Disetujui',
         'desc'  => 'Selamat! Booking Kamar %s sudah disetujui pengelola. Kamar ditahan untuk Anda.',
         'steps' => ['done', 'done', 'done'],
-        'info_t' => 'Akun penghuni Anda sudah bisa dipakai.',
-        'info_d' => 'Pengelola akan membuatkan akun penghuni dan mengirim username lewat WhatsApp. Setelah itu Anda bisa masuk ke dashboard.',
+        'info_t' => 'Akun penghuni dibuat oleh pengelola.',
+        'info_d' => 'Pengelola akan membuatkan akun penghuni saat Anda masuk, lalu mengirim username dan password lewat WhatsApp. Setelah itu Anda bisa masuk ke dashboard.',
     ],
     'ditolak' => [
         'emoji' => '❌', 'tone' => 'no', 'judul' => 'Booking Ditolak',
@@ -82,19 +83,12 @@ include ROOT_PATH . '/header/header.php';
         </div>
 
         <?php if ($b['status'] === 'disetujui'): ?>
-            <a class="btn btn-accent btn-block" href="<?= url('guest/login.php?role=penghuni') ?>">Masuk ke Dashboard</a>
+            <a class="btn btn-accent btn-block" href="<?= url('guest/login.php?role=penghuni') ?>">Sudah punya akun? Masuk</a>
         <?php elseif ($b['status'] === 'ditolak'): ?>
             <a class="btn btn-accent btn-block" href="<?= url('guest/kamar.php?filter=kosong') ?>">Pilih Kamar Lain</a>
         <?php endif; ?>
         <a class="btn btn-outline btn-block status-back" href="<?= url('guest/index.php') ?>">Kembali ke Beranda</a>
 
-        <div class="demo-box">
-            <strong>Demo (sementara, sebelum database):</strong> simulasi keputusan pengelola<br>
-            <a href="<?= url('guest/booking-simpan.php?aksi=demo-setuju') ?>">Disetujui</a> ·
-            <a href="<?= url('guest/booking-simpan.php?aksi=demo-tolak') ?>">Ditolak</a> ·
-            <a href="<?= url('guest/booking-simpan.php?aksi=demo-menunggu') ?>">Menunggu</a> ·
-            <a href="<?= url('guest/booking-simpan.php?aksi=batal') ?>">Hapus pengajuan</a>
-        </div>
     </div>
 <?php endif; ?>
 </main>

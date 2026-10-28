@@ -217,7 +217,8 @@ $role = $role ?? 'guest';
 <script>
     window.KOSTKU = {
         base: <?= json_encode(BASE_URL) ?>,
-        role: <?= json_encode($role) ?>
+        role: <?= json_encode($role) ?>,
+        csrf: <?= json_encode(csrf_token()) ?>
     };
 
     window.KOSTKU_DATA =

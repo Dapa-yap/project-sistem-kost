@@ -7,7 +7,7 @@
         </div>
         <div class="proof"><strong>Bukti transfer</strong><span id="mv-file">-</span></div>
         <div class="modal-info">
-            <div><span>Periode</span><strong>Okt 2026</strong></div>
+            <div><span>Periode</span><strong id="mv-periode">-</strong></div>
             <div><span>Jumlah</span><strong id="mv-jumlah">-</strong></div>
             <div><span>Dikirim</span><strong id="mv-dikirim">-</strong></div>
             <div><span>Status</span><strong id="mv-status">-</strong></div>
