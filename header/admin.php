@@ -9,7 +9,7 @@ $menu = [
     'pembayaran' => ['Pembayaran',         'admin/pembayaran.php'],
     'pengaduan'  => ['Pengaduan',          'admin/pengaduan.php'],
     'booking'    => ['Booking',             'admin/booking.php'],
-    'jadwal'     => ['Kunjungan & Survey', 'admin/kunjungan-survey.php'],
+    'jadwal'     => ['Survey', 'admin/kunjungan-survey.php'],
 ];
 
 $u = current_user();

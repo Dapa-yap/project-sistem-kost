@@ -6,6 +6,7 @@ $menu = [
     'fasilitas'  => ['Fasilitas',    'guest/fasilitas.php'],
     'kontak'     => ['Kontak',       'guest/kontak.php'],
     'status'     => ['Status',       'guest/status.php'],
+    'survey'     => ['Survey',       'guest/survey.php'],
 ];
 $u = current_user();
 $dashHref = $u ? ($u['role'] === 'admin' ? 'admin/dashboard.php' : 'penghuni/dashboard.php') : null;

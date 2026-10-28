@@ -401,7 +401,6 @@
             });
         }
 
-        setup('kunjungan', 'kunjungan');
         setup('survey', 'survey');
     }
 

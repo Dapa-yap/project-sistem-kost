@@ -571,7 +571,7 @@
 
 .spec-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
     margin: 16px 0 8px;
 }
@@ -895,11 +895,11 @@
 
 .auth-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 22px;
-    padding: 30px 30px 26px;
+    padding: 26px 26px 22px;
     box-shadow: var(--shadow);
     align-self: flex-start;
 }
@@ -917,31 +917,75 @@
     margin: 8px 0 18px;
 }
 
-.role-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    background: var(--bg);
-    padding: 4px;
-    border-radius: 12px;
-    margin-bottom: 18px;
-}
+/* Dropdown Role */
+.dropdown { position: relative; }
 
-.role-tab {
-    border: 0;
-    background: transparent;
-    padding: 10px;
-    border-radius: 9px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
+.dropdown-btn {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    padding: 9px 34px 9px 12px;
+    border: 1.5px solid #cdd7ea;
+    border-radius: var(--radius-sm);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
     cursor: pointer;
 }
 
-.role-tab.active {
-    background: var(--navy);
-    color: #fff;
+.dropdown.open .dropdown-btn,
+.dropdown-btn:focus-visible {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, .12);
 }
+
+.dropdown-val.is-placeholder { color: #94a3b8; }
+.dropdown.has-error .dropdown-btn { border-color: var(--red); }
+
+.dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 20;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+}
+
+.dropdown-menu li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.dropdown-menu li:hover { background: var(--bg); }
+
+.dropdown-menu li.selected {
+    background: #e8eefc;
+    color: var(--navy);
+    font-weight: 600;
+}
+
+.dropdown-menu li.selected::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e3a8a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+}
+
+/* Login: tombol Masuk lebih gelap seperti desain baru */
+.auth-card .btn-accent { background: #c2410c; }
+.auth-card .btn-accent:hover { background: #9a3412; }
 
 .auth-row {
     display: flex;

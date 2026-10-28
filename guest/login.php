@@ -9,16 +9,18 @@ if (is_logged_in()) {
     redirect($u['role'] === 'admin' ? 'admin/dashboard.php' : 'penghuni/dashboard.php');
 }
 
-$tab = in_array($_GET['role'] ?? '', ['admin', 'penghuni'], true) ? $_GET['role'] : 'penghuni';
+$tab = in_array($_GET['role'] ?? '', ['admin', 'penghuni'], true) ? $_GET['role'] : '';
 $error = '';
 $username = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tab      = in_array($_POST['role'] ?? '', ['admin', 'penghuni'], true) ? $_POST['role'] : 'penghuni';
+    $tab      = in_array($_POST['role'] ?? '', ['admin', 'penghuni'], true) ? $_POST['role'] : '';
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (!throttle_ok('login', 8, 10)) {
+    if ($tab === '') {
+        $error = 'Pilih role terlebih dahulu.';
+    } elseif (!throttle_ok('login', 8, 10)) {
         $error = 'Terlalu banyak percobaan masuk. Coba lagi dalam beberapa menit.';
     } else {
         $u = find_user($username, $password, $tab);
@@ -45,11 +47,6 @@ include ROOT_PATH . '/header/header.php';
 
         <form method="post" id="login-form" novalidate>
             <input type="hidden" name="role" id="login-role" value="<?= e($tab) ?>">
-            <div class="role-tabs" role="tablist">
-                <button type="button" class="role-tab <?= $tab === 'penghuni' ? 'active' : '' ?>" data-role="penghuni" role="tab">Penghuni</button>
-                <button type="button" class="role-tab <?= $tab === 'admin' ? 'active' : '' ?>" data-role="admin" role="tab">Pengelola</button>
-            </div>
-
             <div class="field">
                 <label for="l-user">Username</label>
                 <input class="input" id="l-user" name="username" placeholder="Masukkan username" value="<?= e($username) ?>" autocomplete="username" required>
@@ -62,6 +59,19 @@ include ROOT_PATH . '/header/header.php';
                 </div>
             </div>
 
+            <div class="field">
+                <label id="role-label">Role</label>
+                <div class="dropdown" id="role-dropdown">
+                    <button type="button" class="dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="role-label">
+                        <span class="dropdown-val <?= $tab === '' ? 'is-placeholder' : '' ?>"><?= $tab === 'admin' ? 'Pengelola' : ($tab === 'penghuni' ? 'Penghuni' : 'Pilih role') ?></span>
+                    </button>
+                    <ul class="dropdown-menu" role="listbox" hidden>
+                        <li role="option" data-role="penghuni" class="<?= $tab === 'penghuni' ? 'selected' : '' ?>">Penghuni</li>
+                        <li role="option" data-role="admin" class="<?= $tab === 'admin' ? 'selected' : '' ?>">Pengelola</li>
+                    </ul>
+                </div>
+            </div>
+
             <div class="auth-row">
                 <label class="checkbox"><input type="checkbox" name="ingat"> Ingat saya</label>
                 <button type="button" class="link" data-open="modal-reset">Lupa password?</button>
@@ -70,7 +80,7 @@ include ROOT_PATH . '/header/header.php';
             <button class="btn btn-accent btn-block" type="submit">Masuk</button>
         </form>
 
-        <p class="auth-foot" id="login-foot">Akun penghuni dibuat oleh pengelola setelah booking disetujui. Belum punya kamar? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
+        <p class="auth-foot" id="login-foot">Belum punya akun? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
     </div>
 </main>
 

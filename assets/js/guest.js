@@ -159,117 +159,43 @@
         }
     }
 
-    /* ---------- Kunjungan: pop up dari halaman Fasilitas ---------- */
-    function initKunjungan() {
-        var form = $('#kunjungan-form');
-
-        if (!form) return;
-
-        var tgl = $('#k-tgl');
-
-        if (tgl) {
-            tgl.min = KK.today();
-        }
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!KK.validate(form)) return;
-
-            var f = new FormData(form);
-
-            // Kunjungan hanya Senin-Sabtu
-            var p = String(f.get('tgl')).split('-');
-
-            var day = new Date(
-                +p[0],
-                +p[1] - 1,
-                +p[2]
-            ).getDay();
-
-            if (day === 0) {
-                var field = tgl.closest('.field');
-
-                if (!$('.field-error', field)) {
-                    var s = document.createElement('span');
-
-                    s.className = 'field-error';
-                    s.textContent = 'Kunjungan hanya Senin–Sabtu';
-
-                    field.appendChild(s);
-                }
-
-                field.classList.add('has-error');
-
-                return;
-            }
-
-            kirim('guest/kunjungan-simpan.php', {
-                jenis: 'kunjungan', nama: f.get('nama'), wa: f.get('wa'), tgl: f.get('tgl'), catatan: f.get('catatan')
-            }).then(function () {
-                // Ambil URL daftar kamar dari atribut form
-                var kamarUrl = form.dataset.kamarUrl;
-
-                // Tutup modal Kunjungan
-                KK.closeModal('modal-kunjungan');
-
-                // Tampilkan pesan berhasil
-                KK.dialog({
-                    type: 'success',
-
-                    title: 'Jadwal kunjungan terkirim',
-
-                    text:
-                        'Kunjungan pada ' +
-                        KK.fmtDate(f.get('tgl'), true) +
-                        '. Pengelola akan mengonfirmasi lewat WhatsApp.',
-
-                    actions: [
-                        {
-                            label: 'Lihat Daftar Kamar',
-                            cls: 'btn-outline',
-
-                            onClick: function () {
-                                if (kamarUrl) {
-                                    window.location.href = kamarUrl;
-                                }
-                            }
-                        },
-
-                        {
-                            label: 'Tutup',
-                            cls: 'btn-primary'
-                        }
-                    ]
-                });
-
-
-                KK.resetForm(form);
-            }).catch(gagal);
-        });
-    }
-
     /* ---------- Login ---------- */
     function initLogin() {
         var roleInput = $('#login-role');
 
-        $$('.role-tab').forEach(function (tab) {
-            tab.addEventListener('click', function () {
+        var dd = $('#role-dropdown');
+        var ddBtn = dd.querySelector('.dropdown-btn');
+        var ddMenu = dd.querySelector('.dropdown-menu');
 
-                $$('.role-tab').forEach(function (t) {
-                    t.classList.toggle('active', t === tab);
-                });
+        function ddToggle(open) {
+            ddMenu.hidden = !open;
+            ddBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            dd.classList.toggle('open', open);
+        }
 
-                roleInput.value = tab.dataset.role;
+        ddBtn.addEventListener('click', function () { ddToggle(ddMenu.hidden); });
 
-                $('#l-user').focus();
-            });
+        ddMenu.addEventListener('click', function (e) {
+            var li = e.target.closest('li[data-role]');
+            if (!li) return;
+            roleInput.value = li.dataset.role;
+            var dv = dd.querySelector('.dropdown-val');
+            dv.textContent = li.textContent;
+            dv.classList.remove('is-placeholder');
+            dd.classList.remove('has-error');
+            ddMenu.querySelectorAll('li').forEach(function (x) { x.classList.toggle('selected', x === li); });
+            ddToggle(false);
         });
+
+        document.addEventListener('click', function (e) { if (!dd.contains(e.target)) ddToggle(false); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') ddToggle(false); });
 
         var form = $('#login-form');
 
         form.addEventListener('submit', function (e) {
-            if (!KK.validate(form)) {
+            var okRole = roleInput.value !== '';
+            dd.classList.toggle('has-error', !okRole);
+            if (!KK.validate(form) || !okRole) {
                 e.preventDefault();
             }
         });
@@ -306,10 +232,6 @@
         if (page === 'guest-login') {
             initLogin();
         }
-
-        // Jalan di halaman mana pun yang punya
-        // #kunjungan-form
-        initKunjungan();
     });
 
 })();
