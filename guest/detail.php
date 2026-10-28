@@ -505,16 +505,6 @@ include ROOT_PATH . '/header/header.php';
             <?php endif; ?>
 
 
-            <button
-                class="btn btn-outline"
-                type="button"
-                data-open="modal-survey"
-                <?= $bisaBooking ? '' : 'disabled' ?>
-            >
-                Jadwalkan Survei
-            </button>
-
-
             <p class="book-note">
 
                 <?=

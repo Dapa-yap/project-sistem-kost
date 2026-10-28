@@ -242,7 +242,6 @@ include ROOT_PATH . '/header/header.php';
 
                                     <tr>
                                         <th>Nama</th>
-                                        <th>Kamar</th>
                                         <th>Tanggal</th>
                                         <th>Jam</th>
                                         <th>Status</th>
@@ -263,10 +262,6 @@ include ROOT_PATH . '/header/header.php';
 
                                             <td>
                                                 <?= e($s['nama']) ?>
-                                            </td>
-
-                                            <td>
-                                                <?= e($s['kamar'] ?: '-') ?>
                                             </td>
 
                                             <td class="nowrap">

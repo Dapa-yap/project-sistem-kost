@@ -349,13 +349,13 @@ function buat_booking($nomor, $nama, $wa, $tglMasuk) {
 function buat_kunjungan($jenis, $nama, $wa, $tgl, $jam, $kamar, $catatan) {
     $nama = trim((string) $nama); $wa = trim((string) $wa);
     if (!in_array($jenis, ['kunjungan', 'survey'], true)) gagal('Jenis jadwal tidak valid.');
-    if ($nama === '' || !valid_hp($wa) || !valid_tanggal($tgl)) gagal('Data wajib belum lengkap atau tidak valid.');
+    if ($nama === '' || ($wa !== '' && !valid_hp($wa)) || !valid_tanggal($tgl)) gagal('Data wajib belum lengkap atau tidak valid.');
     if ($tgl < date('Y-m-d')) gagal('Tanggal tidak boleh di masa lalu.');
     if ((int) date('w', strtotime($tgl)) === 0) gagal('Kunjungan hanya Senin–Sabtu.');
     $kamar = trim((string) $kamar);
     if ($kamar !== '' && !kamar_row($kamar)) gagal('Kamar tidak ditemukan.');
     $jam = preg_match('/^\d{2}:\d{2}$/', (string) $jam) ? $jam : null;
     $r = db_one('INSERT INTO kunjungan (nama, tanggal, status, jenis, no_hp, kamar, jam, catatan) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_kunjungan',
-        [$nama, $tgl, db_enum_value('kunjungan', 'status', 'menunggu'), $jenis, $wa, $kamar ?: null, $jam, trim((string) $catatan) ?: null]);
+                [$nama, $tgl, db_enum_value('kunjungan', 'status', 'menunggu'), $jenis, $wa ?: null, $kamar ?: null, $jam, trim((string) $catatan) ?: null]);
     return (int) $r['id_kunjungan'];
 }

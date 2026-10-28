@@ -343,9 +343,6 @@
                 var html =
                     '<div class="kv">' +
                     '<div class="kv-item"><small>Nama</small><strong>' + KK.esc(x.nama) + '</strong></div>' +
-                    '<div class="kv-item"><small>No. HP</small><strong>' +
-                        (hp ? '<a class="link" href="' + KK.esc(wa) + '" target="_blank" rel="noopener">' + KK.esc(hp) + '</a>' : '-') + '</strong></div>' +
-                    '<div class="kv-item"><small>Kamar</small><strong>' + (x.kamar ? KK.esc(x.kamar) : 'Belum menentukan') + '</strong></div>' +
                     '<div class="kv-item"><small>Tanggal</small><strong>' + (tgl ? short(tgl) : '-') + '</strong></div>' +
                     '<div class="kv-item"><small>Jam</small><strong>' + KK.esc(x.jam || '-') + '</strong></div>' +
                     (x.catatan ? '<div class="kv-item"><small>Catatan</small><strong>' + KK.esc(x.catatan) + '</strong></div>' : '') +

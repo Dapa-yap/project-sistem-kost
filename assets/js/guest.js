@@ -159,6 +159,55 @@
         }
     }
 
+        /* ---------- Survey: halaman mandiri ---------- */
+    function initSurvey() {
+        var form = $('#survey-form');
+        if (!form) return;
+
+        // Tanggal tidak boleh sebelum hari ini
+        var tgl = $('#s-tgl');
+        if (tgl) tgl.min = KK.today();
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();               // cegah reload halaman
+            if (!KK.validate(form)) return;   // cek kolom wajib
+
+            var f = new FormData(form);
+
+            // Survey hanya Senin-Sabtu (getDay() === 0 artinya Minggu)
+            var p = String(f.get('tgl')).split('-');
+            var day = new Date(+p[0], +p[1] - 1, +p[2]).getDay();
+
+            if (day === 0) {
+                var field = tgl.closest('.field');
+                if (!$('.field-error', field)) {
+                    var s = document.createElement('span');
+                    s.className = 'field-error';
+                    s.textContent = 'Survey hanya Senin–Sabtu';
+                    field.appendChild(s);
+                }
+                field.classList.add('has-error');
+                return;
+            }
+
+            // Kirim ke server, lalu tampilkan pop up kalau berhasil
+            kirim('guest/kunjungan-simpan.php', {
+                jenis: 'survey',
+                nama: f.get('nama'),
+                tgl: f.get('tgl'),
+                jam: f.get('jam')
+            }).then(function () {
+                KK.success(
+                    'Jadwal survei terkirim',
+                    'Survey pada ' + KK.fmtDate(f.get('tgl'), true) +
+                    ', pukul ' + f.get('jam') + '. Silakan datang sesuai jadwal.',
+                    'Tutup'
+                );
+                KK.resetForm(form);
+            }).catch(gagal);                  // kalau server menolak, tampil toast error
+        });
+    }
+
     /* ---------- Login ---------- */
     function initLogin() {
         var roleInput = $('#login-role');
@@ -227,6 +276,10 @@
 
         if (page === 'guest-detail') {
             initDetail();
+        }
+
+        if (page === 'guest-survey') {
+            initSurvey();
         }
 
         if (page === 'guest-login') {
