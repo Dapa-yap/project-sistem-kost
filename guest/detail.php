@@ -55,6 +55,11 @@ $fotoKamar = [
 ];
 
 $foto = $fotoKamar[$k['id']] ?? [];
+$fotoFolder = 'assets/image/';
+if (!empty($k['foto'])) {
+    $foto = [$k['foto']];
+    $fotoFolder = 'uploads/';
+}
 
 /* =========================================================
    KAMAR LAIN YANG MASIH KOSONG
@@ -179,7 +184,7 @@ include ROOT_PATH . '/header/header.php';
 
                             <div class="gallery-photo">
                                 <img
-                                    src="<?= url('assets/image/' . $nama) ?>"
+                                    src="<?= url($fotoFolder . $nama) ?>"
                                     alt="Foto Kamar <?= e($k['id']) ?> - <?= $i + 1 ?>"
                                 >
                             </div>
