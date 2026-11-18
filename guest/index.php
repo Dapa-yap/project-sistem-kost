@@ -15,7 +15,7 @@ include ROOT_PATH . '/header/header.php';
     <section class="hero">
         <div class="container hero-grid">
             <div>
-                <span class="hero-tag">Pilihan Mahasiswa Perantau</span>
+                <span class="hero-tag">Pilihan Kost Laki Laki</span>
                 <h1>Ruang Nyaman Untuk <em>Cerita Barumu.</em></h1>
                 <p class="lead">Tempat tinggal idaman dengan fasilitas lengkap, keamanan terjamin, dan lokasi strategis. Temukan kamar kosong dan jadwalkan kunjungan hari ini.</p>
                 <div class="hero-cta">

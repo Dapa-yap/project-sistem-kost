@@ -1,4 +1,3 @@
 <a class="logo" href="<?= url($logoHref ?? 'guest/index.php') ?>" aria-label="KostKu">
-    <span class="logo-mark" aria-hidden="true"></span>
-    <span class="logo-text">KostKu.</span>
+    <img src="<?= asset('img/logo-kostku.png') ?>" alt="KostKu" class="logo-img">
 </a>
