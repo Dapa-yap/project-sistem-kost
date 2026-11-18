@@ -20,7 +20,7 @@ api_run(function () {
         case 'ubah_kamar':
             $fas = $_POST['fasilitas'] ?? [];
             ubah_kamar(post('nomor'), post('tipe'), post('ukuran'), post('status'), post('harga'),
-               is_array($fas) ? $fas : [], $_FILES['foto'] ?? null);
+               is_array($fas) ? $fas : [], $_FILES['foto'] ?? null, $_FILES['foto2'] ?? null);
             return [];
         case 'tambah_penghuni':
             tambah_penghuni(post('nama'), post('hp'), post('username'), post('password'), post('kamar'), post('tgl'));

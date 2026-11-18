@@ -107,9 +107,15 @@ include ROOT_PATH . '/header/header.php';
                     <?php endforeach; ?>
                 </div>
             </div>
+            <div class="field-row">
             <div class="field">
-                <label for="u-foto">Foto kamar (JPG/PNG, maks 5 MB)</label>
+                <label for="u-foto">Foto kamar 1 (JPG/PNG, maks 5 MB)</label>
                 <input class="input" type="file" id="u-foto" name="foto" accept="image/jpeg,image/png">
+            </div>
+            <div class="field">
+                <label for="u-foto2">Foto kamar 2 (JPG/PNG, maks 5 MB)</label>
+                <input class="input" type="file" id="u-foto2" name="foto2" accept="image/jpeg,image/png">
+            </div>
             </div>
             <div class="modal-foot">
                 <button class="btn btn-ghost" type="button" data-close>Batal</button>

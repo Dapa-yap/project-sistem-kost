@@ -170,14 +170,14 @@ function keluarkan_penghuni($nomor, $tgl, $kondisi) {
 /* =====================================================================
    PENGELOLA: KAMAR
    ===================================================================== */
-function ubah_kamar($nomor, $tipe, $ukuran, $status, $harga, array $fasilitas, $foto = null) {
+function ubah_kamar($nomor, $tipe, $ukuran, $status, $harga, array $fasilitas, $foto = null, $foto2 = null) {
     $ukuran = trim($ukuran);
     if (!in_array($tipe, ['Standar', 'Premium'], true)) gagal('Tipe kamar tidak valid.');
     if (!in_array($status, ['kosong', 'terisi', 'booking', 'diperbaiki'], true)) gagal('Status kamar tidak valid.');
     if ($ukuran === '') gagal('Ukuran wajib diisi.');
     if (!is_numeric($harga) || $harga < 100000) gagal('Harga tidak valid.');
 
-    dalam_transaksi(function () use ($nomor, $tipe, $ukuran, $status, $harga, $fasilitas, $foto) {
+    dalam_transaksi(function () use ($nomor, $tipe, $ukuran, $status, $harga, $fasilitas, $foto, $foto2) {
         $k = kamar_row($nomor, true);
         if (!$k) gagal('Kamar tidak ditemukan.');
         if ($k['userid'] && $status !== 'terisi') gagal('Kamar masih dihuni. Gunakan "Keluarkan" di halaman Penghuni dulu.');
@@ -185,11 +185,12 @@ function ubah_kamar($nomor, $tipe, $ukuran, $status, $harga, array $fasilitas, $
 
         db_exec('UPDATE kamar SET tipe = ?, ukuran = ?, harga = ?, status = ? WHERE id = ?',
             [db_enum_value('kamar', 'tipe', $tipe), $ukuran, (int) $harga, db_enum_value('kamar', 'status', $status), $k['id']]);
-            $namaFoto = simpan_upload($foto, 'kamar');   // null kalau tidak ada file
-            if ($namaFoto) {
-            $lama = db_one('SELECT foto FROM kamar WHERE id = ?', [$k['id']]);
-            db_exec('UPDATE kamar SET foto = ? WHERE id = ?', [$namaFoto, $k['id']]);
-            if (!empty($lama['foto'])) @unlink(ROOT_PATH . '/uploads/' . basename($lama['foto']));
+             foreach (['foto' => $foto, 'foto2' => $foto2] as $kolom => $file) {
+            $namaFoto = simpan_upload($file, 'kamar');   // null kalau tidak ada file
+            if (!$namaFoto) continue;
+            $lama = db_one('SELECT ' . $kolom . ' AS f FROM kamar WHERE id = ?', [$k['id']]);
+            db_exec('UPDATE kamar SET ' . $kolom . ' = ? WHERE id = ?', [$namaFoto, $k['id']]);
+            if (!empty($lama['f'])) @unlink(ROOT_PATH . '/uploads/' . basename($lama['f']));
         }
 
         // sinkron fasilitas kamar (hanya yang kategori private)

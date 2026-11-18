@@ -56,8 +56,9 @@ $fotoKamar = [
 
 $foto = $fotoKamar[$k['id']] ?? [];
 $fotoFolder = 'assets/image/';
-if (!empty($k['foto'])) {
-    $foto = [$k['foto']];
+$fotoUpload = array_values(array_filter([$k['foto'] ?? null, $k['foto2'] ?? null]));
+if ($fotoUpload) {
+    $foto = $fotoUpload;
     $fotoFolder = 'uploads/';
 }
 

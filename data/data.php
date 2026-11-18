@@ -113,7 +113,7 @@ function find_user($username, $password, $role) {
 /* ---------- Kamar ---------- */
 function get_kamar() {
     $rows = db_rows('SELECT k.id, k.nomor_kamar, k.tipe::text AS tipe, k.ukuran, k.harga, k.status::text AS status,
-                            k.foto, u.nama AS penghuni
+                            k.foto, k.foto2, u.nama AS penghuni
                      FROM kamar k LEFT JOIN "user" u ON u.id = k.userid
                      ORDER BY k.nomor_kamar');
     $fas = [];
@@ -133,6 +133,7 @@ function get_kamar() {
             'status'    => norm_status($r['status']),
             'penghuni'  => $r['penghuni'],
             'foto'      => $r['foto'],
+            'foto2'     => $r['foto2'],
             'kapasitas' => '1 orang',
             'fasilitas' => $fas[$r['id']] ?? [],
         ];

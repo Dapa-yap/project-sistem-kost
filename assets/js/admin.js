@@ -442,6 +442,7 @@
             $('#u-harga').value = k.harga;
             $$('#u-fasilitas input').forEach(function (cb) { cb.checked = k.fasilitas.indexOf(cb.value) !== -1; });
             $('#u-foto').value = '';
+            $('#u-foto2').value = '';
             KK.openModal('modal-ubah');
         });
 
@@ -459,7 +460,8 @@
                 fasilitas: $$('#u-fasilitas input:checked').map(function (cb) { return cb.value; })
             };
             var fotoFile = $('#u-foto').files[0];
-            KK.api('admin', 'ubah_kamar', data, { foto: fotoFile }).then(function () {
+            var fotoFile2 = $('#u-foto2').files[0];
+            KK.api('admin', 'ubah_kamar', data, { foto: fotoFile, foto2: fotoFile2 }).then(function () {
                 try { sessionStorage.setItem('kk_kamar', selected); } catch (err) {}
                 KK.reloadWith({ title: 'Perubahan Berhasil di Simpan', text: 'Perubahan data pada kamar ' + k.id + ' sudah berhasil.', btn: 'Kembali' });
             }).catch(fail);
