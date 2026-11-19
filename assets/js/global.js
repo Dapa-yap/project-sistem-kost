@@ -204,6 +204,20 @@
         // klik overlay (di luar modal)
         if (t.classList && t.classList.contains('modal-overlay')) { KK.closeModal(t); return; }
 
+               // menu profil (dropdown): buka/tutup, tutup kalau klik di luar
+        var ut = t.closest('[data-user-toggle]');
+        KK.$$('[data-user-menu].is-open').forEach(function (m) {
+            if (ut && m === ut.closest('[data-user-menu]')) return;
+            m.classList.remove('is-open');
+            var b = KK.$('[data-user-toggle]', m);
+            if (b) b.setAttribute('aria-expanded', 'false');
+        });
+        if (ut) {
+            var um = ut.closest('[data-user-menu]');
+            ut.setAttribute('aria-expanded', um.classList.toggle('is-open') ? 'true' : 'false');
+            return;
+        }
+
         // logout
         var lo = t.closest('[data-logout]');
         if (lo) {
@@ -217,26 +231,6 @@
             });
             return;
         }
-
-        // menu mobile
-        var nt = t.closest('[data-nav-toggle]');
-        if (nt) {
-            var nav = KK.$('[data-nav]');
-            if (nav) nav.classList.toggle('is-open');
-            return;
-        }
-
-        // tampil/sembunyi password
-        var tp = t.closest('[data-toggle-password]');
-        if (tp) {
-            var input = tp.closest('.input-icon').querySelector('input');
-            var show = input.type === 'password';
-            input.type = show ? 'text' : 'password';
-            tp.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
-            tp.classList.toggle('is-on', show);
-            return;
-        }
-
         // salin teks
         var cp = t.closest('[data-copy]');
         if (cp) {

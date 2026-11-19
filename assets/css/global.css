@@ -1686,7 +1686,7 @@ button.denah-room:hover {
     body.role-penghuni .logo { padding: 4px 10px 20px; }
 
     /* menu */
-       body.role-admin .nav-links,
+    body.role-admin .nav-links,
     body.role-admin .navbar-inner.navbar-wide .nav-links,
     body.role-penghuni .nav-links {
         flex-direction: column;
@@ -1720,4 +1720,55 @@ button.denah-room:hover {
     }
     body.role-admin .nav-right .btn,
     body.role-penghuni .nav-right .btn { width: 100%; }
+}
+
+
+/* ---------- Dropdown profil: HANYA di HP (desktop tetap avatar + nama + tombol Keluar) ---------- */
+.user-menu { display: none; position: relative; }
+
+@media (max-width: 900px) {
+    .nav-right > .user-chip,
+    .nav-right > .btn { display: none; }
+    .user-menu { display: block; }
+
+    .navbar .logo { flex: none; }
+
+    .user-trigger {
+        display: flex; align-items: center; gap: 10px;
+        padding: 4px 8px 4px 4px; border: 0; border-radius: 999px;
+        background: none; color: var(--ink); font: inherit; cursor: pointer;
+    }
+    .user-trigger:hover { background: var(--bg); }
+    .user-trigger .user-meta { display: flex; max-width: 120px; text-align: left; }
+    .user-trigger .user-meta strong {
+        font-size: 14px; font-weight: 600;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .user-trigger .chev {
+        width: 16px; height: 16px; flex: none;
+        fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        transition: transform .15s;
+    }
+    .user-menu.is-open .chev { transform: rotate(180deg); }
+
+    .user-dropdown {
+        display: none; position: absolute; top: calc(100% + 8px); right: 0; z-index: 70;
+        min-width: 180px; padding: 6px;
+        background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg);
+    }
+    .user-menu.is-open .user-dropdown { display: block; }
+    .user-dropdown-item {
+        width: 100%; padding: 10px 12px; border: 0; border-radius: 8px; text-align: left;
+        background: none; color: var(--red); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .user-dropdown-item:hover { background: var(--red-soft); }
+}
+@media (max-width: 480px) {
+    .user-trigger { gap: 8px; padding-right: 6px; }
+    .user-trigger .user-meta { max-width: 70px; }
+    .navbar .logo-img { height: 30px; }
+    .navbar .nav-toggle { padding: 6px 4px; }
+}
+@media (max-width: 340px) {
+    .user-trigger .user-meta { display: none; }
 }
