@@ -39,6 +39,15 @@ include ROOT_PATH . '/header/header.php';
 ?>
 <main class="auth-wrap">
     <div class="auth-card">
+        <aside class="auth-art">
+            <div class="auth-art-text">
+                <h2>Selamat datang kembali di KostKu</h2>
+                <p>Kelola kamar, pembayaran, dan status hunian Anda dalam satu tempat.</p>
+            </div>
+            <img src="<?= asset('img/hero.png') ?>" alt="Gedung KostKu">
+        </aside>
+
+        <div class="auth-form">
         <h1>Masuk ke KostKu</h1>
         <p class="sub">Pilih peran Anda, lalu masuk dengan akun yang terdaftar.</p>
 
@@ -80,7 +89,8 @@ include ROOT_PATH . '/header/header.php';
             <button class="btn btn-accent btn-block" type="submit">Masuk</button>
         </form>
 
-        <p class="auth-foot" id="login-foot">Belum punya akun? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
+                <p class="auth-foot" id="login-foot">Belum punya akun? <a href="<?= url('guest/kamar.php?filter=kosong') ?>">Booking kamar dulu</a></p>
+        </div><!-- /auth-form -->
     </div>
 </main>
 
