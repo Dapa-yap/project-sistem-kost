@@ -1575,3 +1575,72 @@ button.denah-room:hover {
         scroll-behavior: auto !important;
     }
 }
+
+/* =========================================================
+   Navbar jadi sidebar kiri (pengelola & penghuni) - CSS saja
+   Hanya di layar > 900px; di HP tetap navbar atas yang lama.
+   ========================================================= */
+@media (min-width: 901px) {
+    body.role-admin,
+    body.role-penghuni { padding-left: 248px; }
+
+    body.role-admin .navbar,
+    body.role-penghuni .navbar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        width: 248px;
+        border-bottom: 0;
+        border-right: 1px solid var(--line);
+        overflow-y: auto;
+    }
+
+    body.role-admin .navbar-inner,
+    body.role-penghuni .navbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+        height: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 18px 14px;
+        gap: 0;
+    }
+
+    body.role-admin .logo,
+    body.role-penghuni .logo { padding: 4px 10px 20px; }
+
+    /* menu */
+       body.role-admin .nav-links,
+    body.role-admin .navbar-inner.navbar-wide .nav-links,
+    body.role-penghuni .nav-links {
+        flex-direction: column;
+        gap: 4px;
+        margin: 0;
+        flex: 1;
+    }
+    body.role-admin .nav-links a,
+    body.role-penghuni .nav-links a {
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+    body.role-admin .nav-links a:hover,
+    body.role-penghuni .nav-links a:hover { background: var(--bg); }
+
+    body.role-admin .nav-links a.active,
+    body.role-penghuni .nav-links a.active { background: var(--navy-soft); }
+
+    body.role-admin .nav-links a.active::after,
+    body.role-penghuni .nav-links a.active::after { display: none; }
+
+    /* profil + tombol Keluar di bawah */
+    body.role-admin .nav-right,
+    body.role-penghuni .nav-right {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-top: 16px;
+        padding: 14px 4px 0;
+        border-top: 1px solid var(--line);
+    }
+    body.role-admin .nav-right .btn,
+    body.role-penghuni .nav-right .btn { width: 100%; }
+}
