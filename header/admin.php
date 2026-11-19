@@ -13,6 +13,7 @@ $menu = [
 ];
 
 $u = current_user();
+$badge = get_badge_admin();
 ?>
 
 <header class="navbar">
@@ -40,6 +41,9 @@ $u = current_user();
                     class="<?= $activeMenu === $key ? 'active' : '' ?>"
                 >
                     <?= e($label) ?>
+                    <?php if (!empty($badge[$key])): ?>
+                    <span class="nav-badge"><?= (int) $badge[$key] ?></span>
+                    <?php endif; ?>
                 </a>
 
             <?php endforeach; ?>

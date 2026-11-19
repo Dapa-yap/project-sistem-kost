@@ -293,6 +293,19 @@ function get_pengaduan_admin() {
     }
     return $out;
 }
+/** Jumlah item yang perlu ditindaklanjuti admin (untuk badge di menu). */
+function get_badge_admin() {
+    $hitung = function ($tabel, $status) {
+        $r = db_one("SELECT COUNT(*) AS n FROM $tabel WHERE lower(status::text) = ?", [$status]);
+        return (int) ($r['n'] ?? 0);
+    };
+    return [
+        'pembayaran' => $hitung('pembayaran', 'menunggu'),   // bukti transfer belum diverifikasi
+        'pengaduan'  => $hitung('pengaduan',  'diajukan'),   // aduan baru
+        'booking'    => $hitung('booking',    'menunggu'),   // booking belum dikonfirmasi
+        'jadwal'     => $hitung('kunjungan',  'menunggu'),   // survey belum dikonfirmasi
+    ];
+}
 
 /* ---------- Booking (calon penghuni) ---------- */
 function get_booking() {
