@@ -29,11 +29,10 @@ include ROOT_PATH . '/header/header.php';
                 <div class="stat"><div class="stat-label">Kamar Terisi</div><div class="stat-value" id="st-terisi"><?= $terisi ?></div><div class="stat-note" id="st-terisi-note">dari <?= $total ?> kamar</div></div>
                 <div class="stat"><div class="stat-label">Kamar Kosong</div><div class="stat-value" id="st-kosong"><?= $kosong ?></div><div class="stat-note">Siap dibooking</div></div>
             </div>
-            <button class="btn btn-brown" type="button" data-open="modal-tambah">+ Tambah Penghuni</button>
         </div>
 
         <div class="card">
-            <div class="card-head"><h2>Daftar Penghuni</h2><input class="input" style="max-width:260px" type="search" placeholder="Cari nama atau nomor kamar" data-search-target="#penghuni-body" aria-label="Cari penghuni"></div>
+            <div class="card-head"><h2>Daftar Penghuni</h2><div style="display:flex;gap:10px;align-items:center;flex-wrap:nowrap"><input class="input" style="width:260px;max-width:100%;flex:0 1 260px;min-width:0" type="search" placeholder="Cari nama atau nomor kamar" data-search-target="#penghuni-body" aria-label="Cari penghuni"><button class="btn btn-brown" type="button" data-open="modal-tambah">+ Tambah</button></div></div>
             <div class="table-wrap"><table class="table">
                 <thead><tr><th>No.</th><th>Nama</th><th>No. Kamar</th><th>Lantai &amp; Tipe</th><th>Tanggal Masuk</th><th>No. HP</th><th>Aksi</th></tr></thead>
                 <tbody id="penghuni-body">
