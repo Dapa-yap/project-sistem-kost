@@ -303,7 +303,9 @@ function get_badge_admin() {
         'pembayaran' => $hitung('pembayaran', 'menunggu'),   // bukti transfer belum diverifikasi
         'pengaduan'  => $hitung('pengaduan',  'diajukan'),   // aduan baru
         'booking'    => $hitung('booking',    'menunggu'),   // booking belum dikonfirmasi
-        'jadwal'     => $hitung('kunjungan',  'menunggu'),   // survey belum dikonfirmasi
+        'jadwal'     => (int) (db_one("SELECT COUNT(*) AS n FROM kunjungan
+                               WHERE lower(status::text) = 'menunggu'
+                                 AND COALESCE(jenis, 'kunjungan') = 'survey'")['n'] ?? 0),   // survey belum dikonfirmasi
     ];
 }
 
