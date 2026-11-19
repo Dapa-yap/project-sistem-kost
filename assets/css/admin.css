@@ -5,6 +5,7 @@
 .admin-wrap { max-width: 1120px; }
 .split { display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start; }
 .split-wide { grid-template-columns: 1.7fr 1fr; }
+.split > * { min-width: 0; }   
 .panel-sticky { position: sticky; top: 84px; }
 .stack { display: flex; flex-direction: column; gap: 20px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }

@@ -37,13 +37,16 @@ include ROOT_PATH . '/header/header.php';
         <div class="split split-wide">
             <div class="card">
                 <div class="card-head"><h2>Verifikasi Pembayaran</h2><a class="link" href="<?= url('admin/pembayaran.php') ?>">Lihat semua</a></div>
-                <div class="table-wrap"><table class="table">
+                <div class="table-wrap"><table class="table table-stack">
                     <thead><tr><th>Kamar</th><th>Penghuni</th><th>Periode</th><th>Jumlah</th><th>Aksi</th></tr></thead>
                     <tbody id="verif-body">
                         <?php foreach ($menunggu as $i => $p): ?>
                             <tr data-pay="<?= (int) $p['id'] ?>">
-                                <td><?= e($p['kamar']) ?></td><td><?= e($p['nama']) ?></td><td><?= e($p['periode']) ?></td><td class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td>
-                                <td><button class="btn <?= $i === 0 ? 'btn-accent' : 'btn-outline' ?> btn-sm" type="button" data-act="verifikasi">Verifikasi</button></td>
+                                <td data-label="Kamar"><?= e($p['kamar']) ?></td>
+                                <td data-label="Penghuni"><?= e($p['nama']) ?></td>
+                                <td data-label="Periode"><?= e($p['periode']) ?></td>
+                                <td data-label="Jumlah" class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td>
+                                <td data-label="Aksi"><button class="btn <?= $i === 0 ? 'btn-accent' : 'btn-outline' ?> btn-sm" type="button" data-act="verifikasi">Verifikasi</button></td>
                             </tr>
                         <?php endforeach; ?>
                         <tr data-empty class="empty-row <?= $menunggu ? 'hidden' : '' ?>"><td colspan="5">Tidak ada bukti yang menunggu verifikasi.</td></tr>
@@ -67,14 +70,16 @@ include ROOT_PATH . '/header/header.php';
 
         <div class="card" style="margin-top:20px">
             <div class="card-head"><h2>Pengaduan Terbaru</h2><a class="link" href="<?= url('admin/pengaduan.php') ?>">Lihat semua</a></div>
-            <div class="table-wrap"><table class="table">
+            <div class="table-wrap"><table class="table table-stack">
                 <thead><tr><th>Kamar</th><th>Deskripsi</th><th>Tgl. Pengaduan</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody>
                     <?php foreach ($aduanTampil as $a): ?>
                         <tr data-aduan="<?= (int) $a['id'] ?>" data-status="<?= e($a['status']) ?>">
-                            <td><?= e($a['kamar']) ?></td><td><?= e($a['deskripsi']) ?></td><td class="nowrap"><?= e(tgl($a['tgl'])) ?></td>
-                            <td class="col-status"><?= status_badge('aduan', $a['status']) ?></td>
-                            <td><button class="btn btn-outline btn-sm" type="button" data-act="aduan">Tindak Lanjut</button></td>
+                            <td data-label="Kamar"><?= e($a['kamar']) ?></td>
+                            <td data-label="Deskripsi"><?= e($a['deskripsi']) ?></td>
+                            <td data-label="Tgl. Pengaduan" class="nowrap"><?= e(tgl($a['tgl'])) ?></td>
+                            <td data-label="Status" class="col-status"><?= status_badge('aduan', $a['status']) ?></td>
+                            <td data-label="Aksi"><button class="btn btn-outline btn-sm" type="button" data-act="aduan">Tindak Lanjut</button></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
