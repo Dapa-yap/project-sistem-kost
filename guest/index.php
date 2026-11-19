@@ -25,8 +25,9 @@ include ROOT_PATH . '/header/header.php';
             </div>
             <div class="hero-visual">
                 <div class="hero-visual-inner">
-                    <!-- Ganti dengan foto kost: <img src="<?= asset('img/hero.jpg') ?>" alt="Kost"> -->
-                    Foto kost
+                    <div class="hero-visual-inner">
+                    <img src="<?= asset('img/hero.png') ?>" alt="Gedung KostKu">
+                </div>
                 </div>
                 <div class="hero-status">
                     <span class="dot"></span>
