@@ -17,7 +17,7 @@ include ROOT_PATH . '/header/header.php';
             <div>
                 <span class="hero-tag">Pilihan Kost Laki Laki</span>
                 <h1>Ruang Nyaman Untuk <em>Cerita Barumu.</em></h1>
-                <p class="lead">Tempat tinggal idaman dengan fasilitas lengkap, keamanan terjamin, dan lokasi strategis. Temukan kamar kosong dan jadwalkan kunjungan hari ini.</p>
+                <p class="lead">Tempat tinggal idaman dengan fasilitas lengkap, keamanan terjamin, dan lokasi strategis. Temukan kamar kosong dan booking kamar secepatnya.</p>
                 <div class="hero-cta">
                     <a class="btn btn-accent" href="<?= url('guest/kamar.php?filter=kosong') ?>">Cari Kamar Kosong</a>
                     <a class="btn btn-ghost" href="<?= url('guest/fasilitas.php') ?>">Lihat Fasilitas</a>

@@ -7,11 +7,24 @@ $awal = $_GET['filter'] ?? 'all'; // ?filter=kosong dari tombol "Cari Kamar Koso
 
 include ROOT_PATH . '/header/header.php';
 ?>
-<main>
-    <section class="page-head is-center">
+<main class="kh-scope">
+    <section class="page-head is-center kh-page-head">
         <div class="container">
-            <h1>Pilihan Kamar KostKu</h1>
-            <p>Bandingkan tipe, harga, dan ketersediaan kamar. Pilih yang paling cocok, lalu jadwalkan kunjungan.</p>
+            <div class="kh-hero">
+                <div class="kh-hero-text">
+                    <h1>Pilihan Kamar KostKu</h1>
+                    <p>Bandingkan tipe, harga, dan ketersediaan kamar. Pilih yang paling cocok, lalu jadwalkan kunjungan.</p>
+                    <a href="survey.php" class="kh-cta">Jadwalkan survey</a>
+                </div>
+                <div class="kh-price">
+                    <small>Mulai dari</small>
+                    <div class="kh-price-row">
+                        <span class="kh-price-num">Rp 600k</span>
+                        <span>/bulan</span>
+                    </div>
+                    <small>Kamar 3 × 3 m · Wi-Fi</small>
+                </div>
+            </div>
         </div>
     </section>
 

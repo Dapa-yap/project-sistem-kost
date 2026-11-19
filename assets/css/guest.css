@@ -332,6 +332,186 @@
 
 
 /* =========================================================
+   Header Daftar Kamar (hero + filter)
+   Semua selector diawali .kh-scope (class pada <main> di kamar.php)
+   ========================================================= */
+
+.kh-scope .kh-page-head {
+    background: var(--bg);
+    padding: 24px 0 0;
+    border: 0;
+    text-align: left;
+}
+
+.kh-scope .kh-hero {
+    background: var(--navy);
+    border-radius: 28px;
+    padding: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    box-sizing: border-box;
+}
+
+.kh-scope .kh-hero-text {
+    flex: 1 1 440px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.kh-scope .kh-hero h1 {
+    margin: 0;
+    font-size: 52px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #fff;
+}
+
+.kh-scope .kh-hero p {
+    margin: 0;
+    max-width: 500px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #dbe4ff;
+}
+
+.kh-scope .kh-cta {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 28px;
+    background: #fff;
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+}
+
+.kh-scope .kh-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
+}
+
+.kh-scope .kh-price {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 32px;
+    border-left: 1px solid rgba(255, 255, 255, .28);
+    color: #dbe4ff;
+}
+
+.kh-scope .kh-price small {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.kh-scope .kh-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.kh-scope .kh-price-num {
+    font-size: 44px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #fff;
+}
+
+.kh-scope .page-body {
+    padding-top: 32px;
+}
+
+.kh-scope .list-toolbar {
+    margin: 0 0 24px;
+    padding: 0;
+    gap: 16px;
+}
+
+.kh-scope .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.kh-scope .chip {
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 1px solid #dbe4f5;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.kh-scope .chip:hover {
+    border-color: var(--navy);
+}
+
+.kh-scope .chip.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+}
+
+.kh-scope .sort-select {
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 48px;
+    padding: 0 44px 0 20px;
+    border-radius: 14px;
+    border: 1.5px solid #c7d4f5;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.kh-scope .chip:focus-visible,
+.kh-scope .sort-select:focus-visible,
+.kh-scope .kh-cta:focus-visible {
+    outline: 3px solid #93b4ff;
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+
+    .kh-scope .kh-hero {
+        padding: 32px 24px;
+    }
+
+    .kh-scope .kh-hero h1 {
+        font-size: 36px;
+    }
+
+    .kh-scope .kh-price {
+        width: 100%;
+        padding: 24px 0 0;
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, .28);
+    }
+}
+
+
+/* =========================================================
    Fasilitas
    ========================================================= */
 
