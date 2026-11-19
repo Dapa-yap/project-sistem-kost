@@ -33,6 +33,18 @@
 .proof strong { color: var(--navy); font-size: 13.5px; }
 .proof span { color: var(--muted); font-size: 13px; }
 .proof.is-empty strong { color: var(--muted); }
+.proof.has-bukti { border-color: var(--green); background: var(--green-soft); }
+.proof.has-bukti strong { color: var(--green); }
+.proof span { max-width: 100%; }
+.proof-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-top: 8px;
+}
 
 /* Panel detail (kanan) */
 .side-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; }

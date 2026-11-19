@@ -29,7 +29,10 @@
     function fail(err) { KK.toast(err && err.message ? err.message : 'Gagal menyimpan', 'error'); }
     function berkas(f) { return KK.url('api/berkas.php?f=' + encodeURIComponent(f)); }
     function buktiHtml(f) {
-        return f ? '<a class="link" href="' + KK.esc(berkas(f)) + '" target="_blank" rel="noopener">Lihat foto bukti</a>' : 'Belum ada bukti';
+    if (!f) return 'Belum ada bukti';
+    var src = KK.esc(berkas(f));
+    return '<a href="' + src + '" target="_blank" rel="noopener" title="Klik untuk memperbesar">' +
+           '<img class="proof-img" src="' + src + '" alt="Bukti transfer"></a>';
     }
     function selectRow(tbodySel, tr) {
         $$(tbodySel + ' tr').forEach(function (r) { r.classList.toggle('is-selected', r === tr); });
@@ -98,7 +101,8 @@
             selectedId = id;
             selectRow('#pay-body', $('#pay-body tr[data-pay="' + id + '"]'));
             $('#pay-panel').innerHTML =
-                '<div class="proof' + (p.bukti ? '' : ' is-empty') + '"><strong>Bukti transfer</strong><span>' + buktiHtml(p.bukti) + '</span></div>' +
+                '<div class="proof' + (p.bukti ? ' has-bukti' : ' is-empty') + '"><strong>Bukti transfer</strong><span>' +
+    (p.bukti ? '✓ Bukti sudah dikirim' : 'Belum ada bukti') + '</span></div>' +
                 '<div class="kv-item"><small>Periode</small><strong>' + KK.esc(p.periode || '-') + '</strong></div>' +
                 '<div class="kv">' +
                 '<div class="kv-item"><small>Penghuni</small><strong>' + KK.esc(p.nama) + ' · ' + KK.esc(p.kamar) + '</strong></div>' +
