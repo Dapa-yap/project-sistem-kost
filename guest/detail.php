@@ -82,8 +82,8 @@ $lain = array_slice($lain, 0, 3);
 $bookingSaya = $_SESSION['booking_guest'] ?? null;
 
 $punyaPengajuan =
-    $bookingSaya &&
-    $bookingSaya['status'] === 'menunggu';
+    is_array($bookingSaya) &&
+    ($bookingSaya['status'] ?? '') === 'menunggu';
 
 include ROOT_PATH . '/header/header.php';
 ?>
