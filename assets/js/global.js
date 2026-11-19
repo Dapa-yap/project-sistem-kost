@@ -202,7 +202,8 @@
     /* ---------- Event delegation ---------- */
     document.addEventListener('click', function (ev) {
         var t = ev.target;
-
+        var zm = t.closest('a[data-zoom], a[href*="api/berkas.php"]:not([data-act])');
+        if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
         // buka modal
         var op = t.closest('[data-open]');
         if (op) { ev.preventDefault(); KK.openModal(op.getAttribute('data-open')); return; }
@@ -214,9 +215,6 @@
             if (ov) KK.closeModal(ov);
             return;
         }
-                // perbesar foto bukti
-        var zm = t.closest('a[data-zoom]');
-        if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
 
         // klik overlay (di luar modal)
         if (t.classList && t.classList.contains('modal-overlay')) { KK.closeModal(t); return; }

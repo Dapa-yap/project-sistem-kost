@@ -171,7 +171,7 @@
             $('#ma-sub').textContent = 'Kamar ' + a.kamar + ' · ' + a.deskripsi;
             $('#ma-tgl').textContent = KK.fmtDate(a.tgl);
             $('#ma-foto').innerHTML = a.foto_file
-                ? '<a class="link" href="' + KK.esc(berkas(a.foto_file)) + '" target="_blank" rel="noopener">Lihat foto</a>'
+                ? '<a class="link" href="' + KK.esc(berkas(a.foto_file)) + '" data-zoom>Lihat foto</a>'
                 : 'Tidak ada foto';
             $('#ma-status').value = a.status;
             $('#ma-catatan').value = '';
