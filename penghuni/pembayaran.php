@@ -52,21 +52,21 @@ include ROOT_PATH . '/header/header.php';
             </div>
 
             <div class="table-wrap">
-                <table class="table pay-table">
+                <table class="table table-stack pay-table">
                     <thead>
                         <tr><th>Periode</th><th>Tgl. Tagihan</th><th>Jatuh Tempo</th><th>Jumlah</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr>
                     </thead>
                     <tbody id="pay-body">
-                        <?php foreach ($tagihan as $t): ?>
+                       <?php foreach ($tagihan as $t): ?>
                             <tr data-status="<?= e($t['status']) ?>" data-periode="<?= e($t['periode']) ?>"
                                 data-row="<?= e(json_encode($t, JSON_UNESCAPED_UNICODE)) ?>">
-                                <td class="nowrap"><?= e($t['periode']) ?></td>
-                                <td class="nowrap"><?= e(tgl($t['tgl_tagihan'])) ?></td>
-                                <td class="nowrap"><?= e(tgl($t['jatuh_tempo'])) ?></td>
-                                <td class="nowrap"><?= e(rupiah($t['jumlah'])) ?></td>
-                                <td class="col-status"><?= status_badge('bayar', $t['status']) ?></td>
-                                <td class="bukti"><?= $t['bukti'] ? '<a class="file" data-act="detail" href="' . e(url('api/berkas.php?f=' . urlencode($t['bukti']))) . '">Lihat foto</a>' : '—' ?></td>
-                                <td class="col-aksi"><div class="actions">
+                                <td data-label="Periode" class="nowrap"><?= e($t['periode']) ?></td>
+                                <td data-label="Tgl. Tagihan" class="nowrap"><?= e(tgl($t['tgl_tagihan'])) ?></td>
+                                <td data-label="Jatuh Tempo" class="nowrap"><?= e(tgl($t['jatuh_tempo'])) ?></td>
+                                <td data-label="Jumlah" class="nowrap"><?= e(rupiah($t['jumlah'])) ?></td>
+                                <td data-label="Status" class="col-status"><?= status_badge('bayar', $t['status']) ?></td>
+                                <td data-label="Bukti" class="bukti"><?= $t['bukti'] ? '<a class="file" data-act="detail" href="' . e(url('api/berkas.php?f=' . urlencode($t['bukti']))) . '">Lihat foto</a>' : '—' ?></td>
+                                <td data-label="Aksi" class="col-aksi"><div class="actions">
                                     <?php if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)): ?>
                                         <button class="btn btn-outline btn-sm" type="button" data-act="bukti">Kirim Bukti</button>
                                         <button class="btn btn-accent btn-sm" type="button" data-act="bayar">Bayar</button>

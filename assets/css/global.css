@@ -708,6 +708,10 @@ button {
     .table-stack .empty-row td::before {
         content: none;
     }
+    .table-stack .actions {            /* BARU */
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
 } 
 /* ---------- Form ---------- */
 

@@ -248,6 +248,12 @@
             });
             return;
         }
+        var nt = t.closest('[data-nav-toggle]');
+        if (nt) {
+            var nav = KK.$('[data-nav]');
+            if (nav) nav.classList.toggle('is-open');
+            return;
+        }
         // salin teks
         var cp = t.closest('[data-copy]');
         if (cp) {
