@@ -202,8 +202,7 @@
     /* ---------- Event delegation ---------- */
     document.addEventListener('click', function (ev) {
         var t = ev.target;
-        var zm = t.closest('a[data-zoom], a[href*="api/berkas.php"]:not([data-act])');
-        if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
+
         // buka modal
         var op = t.closest('[data-open]');
         if (op) { ev.preventDefault(); KK.openModal(op.getAttribute('data-open')); return; }
@@ -215,6 +214,9 @@
             if (ov) KK.closeModal(ov);
             return;
         }
+                // perbesar foto bukti
+        var zm = t.closest('a[data-zoom]');
+        if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
 
         // klik overlay (di luar modal)
         if (t.classList && t.classList.contains('modal-overlay')) { KK.closeModal(t); return; }
@@ -420,6 +422,21 @@
         return '<span class="badge badge-' + m[1] + '">' + KK.esc(m[0]) + '</span>';
     };
     KK.label = function (type, status) { return ((BADGES[type] || {})[status] || [status])[0]; };
+
+    /* ---------- Tombol mata (tampilkan / sembunyikan password) ---------- */
+    var EYE_ON  = '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+    var EYE_OFF = '<path d="M3 3l18 18"/><path d="M10.6 6.1A9.8 9.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4"/><path d="M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1"/>';
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target.closest ? ev.target.closest('[data-toggle-password]') : null;
+        if (!btn) return;
+        var input = btn.parentNode.querySelector('input');
+        if (!input) return;
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+        var svg = btn.querySelector('svg');
+        if (svg) svg.innerHTML = show ? EYE_OFF : EYE_ON;
+    });
 
     window.KK = KK;
 })();
