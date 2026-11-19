@@ -25,14 +25,17 @@ include ROOT_PATH . '/header/header.php';
                 </div>
                 <div class="card">
                     <div class="card-head"><h2>Daftar Tagihan</h2></div>
-                    <div class="table-wrap"><table class="table">
+                    <div class="table-wrap"><table class="table table-stack">
                         <thead><tr><th>Penghuni</th><th>Kamar</th><th>Periode</th><th>Jumlah</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
                         <tbody id="pay-body">
                             <?php foreach ($pay as $p): ?>
                                 <tr class="is-clickable" data-pay="<?= (int) $p['id'] ?>" data-status="<?= e($p['status']) ?>">
-                                    <td><?= e($p['nama']) ?></td><td><?= e($p['kamar']) ?></td><td class="nowrap"><?= e($p['periode']) ?></td>
-                                    <td class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td><td class="nowrap"><?= e(tgl($p['jatuh_tempo'])) ?></td>
-                                    <td class="col-status"><?= status_badge('bayar', $p['status']) ?></td>
+                                    <td data-label="Penghuni"><?= e($p['nama']) ?></td>
+                                    <td data-label="Kamar"><?= e($p['kamar']) ?></td>
+                                    <td data-label="Periode" class="nowrap"><?= e($p['periode']) ?></td>
+                                    <td data-label="Jumlah" class="nowrap"><?= e(rupiah($p['jumlah'])) ?></td>
+                                    <td data-label="Jatuh Tempo" class="nowrap"><?= e(tgl($p['jatuh_tempo'])) ?></td>
+                                    <td data-label="Status" class="col-status"><?= status_badge('bayar', $p['status']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             <tr data-empty class="empty-row hidden"><td colspan="6">Tidak ada tagihan pada kategori ini.</td></tr>

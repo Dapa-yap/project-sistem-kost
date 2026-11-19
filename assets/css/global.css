@@ -646,7 +646,69 @@ button {
     color: var(--muted);
     padding: 28px;
 }
+@media (max-width: 640px) {
+    .table-stack {
+        min-width: 0;
+    }
 
+    .table-stack thead {
+        display: none;
+    }
+
+    .table-stack,
+    .table-stack tbody,
+    .table-stack tr,
+    .table-stack td {
+        display: block;
+        width: 100%;
+    }
+
+    .table-stack tbody tr {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .table-stack tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .table-stack td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 0;
+        border-bottom: 0;
+        text-align: right;
+    }
+
+    .table-stack td::before {
+        content: attr(data-label);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        text-align: left;
+    }
+
+    .table-stack tbody tr.is-selected {
+        background: var(--navy-soft);
+    }
+
+    .table-stack tbody tr.is-selected td,
+    .table-stack tbody tr.is-clickable:hover td {
+        background: transparent;
+    }
+
+    .table-stack .empty-row td {
+        display: block;
+        text-align: center;
+        padding: 24px 0;
+    }
+
+    .table-stack .empty-row td::before {
+        content: none;
+    }
+} 
 /* ---------- Form ---------- */
 
 .field {
