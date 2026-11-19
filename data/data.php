@@ -241,6 +241,14 @@ function get_tagihan_penghuni() {
     }
     return $out;
 }
+/** Jumlah tagihan penghuni yang masih harus dibayar / dikirim ulang buktinya (untuk badge menu). */
+function get_badge_penghuni() {
+    $n = 0;
+    foreach (get_tagihan_penghuni() as $t) {
+        if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)) $n++;
+    }
+    return ['pembayaran' => $n];
+}
 
 // Tagihan semua penghuni pada periode (bulan) terbaru
 function get_pembayaran_admin() {

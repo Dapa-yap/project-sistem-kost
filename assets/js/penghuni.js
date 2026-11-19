@@ -9,7 +9,13 @@
     var DATA = window.KOSTKU_DATA || {};
     function fail(err) { KK.toast(err && err.message ? err.message : 'Gagal menyimpan', 'error'); }
     var BISA_BAYAR = ['belum', 'terlambat', 'ditolak'];   // status yang masih boleh bayar / kirim bukti
-
+    function berkas(f) { return KK.url('api/berkas.php?f=' + encodeURIComponent(f)); }
+    function buktiHtml(f) {
+    if (!f) return 'Belum ada bukti';
+    var src = KK.esc(berkas(f));
+    return '<a href="' + src + '" data-zoom title="Klik untuk memperbesar">' +
+           '<img class="proof-img" src="' + src + '" alt="Bukti transfer"></a>';
+}
     /* ---------- Dashboard: ajukan pindah kamar ---------- */
     function initDashboard() {
         var form = $('#pindah-form');
@@ -62,7 +68,7 @@
         function updateRowUI(tr, d) {
             tr.dataset.status = d.status;
             $('.col-status', tr).innerHTML = KK.badge('bayar', d.status);
-            $('.bukti', tr).innerHTML = d.bukti ? '<a class="file" target="_blank" rel="noopener" href="' + KK.esc(KK.url('api/berkas.php?f=' + encodeURIComponent(d.bukti))) + '">Lihat foto</a>' : '—';
+            $('.bukti', tr).innerHTML = d.bukti ? '<a class="file" data-act="detail" href="' + KK.esc(berkas(d.bukti)) + '">Lihat foto</a>' : '—';
             $('.col-aksi', tr).innerHTML = '<div class="actions">' + (BISA_BAYAR.indexOf(d.status) !== -1
                 ? '<button class="btn btn-outline btn-sm" type="button" data-act="bukti">Kirim Bukti</button><button class="btn btn-accent btn-sm" type="button" data-act="bayar">Bayar</button>'
                 : '<button class="btn btn-outline btn-sm" type="button" data-act="detail">Detail</button>') + '</div>';
@@ -87,20 +93,21 @@
             KK.resetForm($('#bukti-form'));
             KK.openModal('modal-bukti');
         }
-
-        function openDetail(tr) {
-            var d = rowData(tr);
+    function openDetail(tr) {
+        var d = rowData(tr);
             $('#mdt-title').textContent = 'Tagihan ' + d.periode;
             $('#mdt-sub').textContent = 'Rincian pembayaran sewa kamar.';
+            $('#mdt-proof').classList.toggle('is-empty', !d.bukti);
+            $('#mdt-file').innerHTML = buktiHtml(d.bukti);
             $('#mdt-info').innerHTML =
                 '<div><span>Periode</span><strong>' + KK.esc(d.periode) + '</strong></div>' +
                 '<div><span>Tanggal tagihan</span><strong>' + KK.fmtDate(d.tgl_tagihan) + '</strong></div>' +
                 '<div><span>Jatuh tempo</span><strong>' + KK.fmtDate(d.jatuh_tempo) + '</strong></div>' +
                 '<div><span>Jumlah</span><strong>' + KK.rupiah(d.jumlah) + '</strong></div>' +
-                '<div><span>Status</span><strong>' + KK.badge('bayar', d.status) + '</strong></div>' +
-                '<div><span>Bukti</span><strong>' + (d.bukti ? KK.esc(d.bukti) : '—') + '</strong></div>';
+                '<div><span>Status</span><strong>' + KK.badge('bayar', d.status) + '</strong></div>';   // <-- titik koma, bukan +
             KK.openModal('modal-detail');
         }
+        
 
         body.addEventListener('click', function (e) {
             var btn = e.target.closest('[data-act]');
@@ -109,7 +116,7 @@
             var act = btn.dataset.act;
             if (act === 'bayar') openBayar(tr);
             else if (act === 'bukti') openBukti(tr);
-            else if (act === 'detail') openDetail(tr);
+            else if (act === 'detail') { e.preventDefault(); openDetail(tr); }
         });
 
         $('#mrk-copy').addEventListener('click', function () {

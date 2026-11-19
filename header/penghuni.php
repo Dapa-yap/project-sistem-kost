@@ -7,6 +7,7 @@ $menu = [
     'pengaduan'  => ['Pengaduan',  'penghuni/pengaduan.php'],
 ];
 $u = current_user();
+$badge = get_badge_penghuni();
 ?>
 <header class="navbar">
     <div class="container navbar-inner">
@@ -18,7 +19,10 @@ $u = current_user();
 
         <nav class="nav-links" data-nav>
             <?php foreach ($menu as $key => [$label, $href]): ?>
-                <a href="<?= url($href) ?>" class="<?= $activeMenu === $key ? 'active' : '' ?>"><?= e($label) ?></a>
+                <a href="<?= url($href) ?>" class="<?= $activeMenu === $key ? 'active' : '' ?>">
+                <?= e($label) ?>
+                <?php if (!empty($badge[$key])): ?><span class="nav-badge"><?= (int) $badge[$key] ?></span><?php endif; ?>
+            </a>
             <?php endforeach; ?>
         </nav>
 

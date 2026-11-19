@@ -184,7 +184,21 @@
             var s = d.querySelector('strong'); if (s && d.dataset.label) s.textContent = d.dataset.label;
         });
     };
-
+/* ---------- Perbesar foto (popup dengan tombol Kembali) ---------- */
+        KK.lihatFoto = function (src) {
+            var ov = document.createElement('div');
+            ov.className = 'modal-overlay';
+            ov.dataset.dynamic = '1';
+            ov.innerHTML =
+                '<div class="modal is-wide foto-viewer" role="dialog" aria-modal="true" aria-label="Foto bukti">' +
+                    '<div class="modal-head">' +
+                        '<button class="btn btn-ghost btn-sm" type="button" data-close>← Kembali</button>' +
+                    '</div>' +
+                    '<img class="foto-full" src="' + KK.esc(src) + '" alt="Bukti transfer">' +
+                '</div>';
+            document.body.appendChild(ov);
+            KK.openModal(ov);
+        };
     /* ---------- Event delegation ---------- */
     document.addEventListener('click', function (ev) {
         var t = ev.target;
@@ -200,6 +214,9 @@
             if (ov) KK.closeModal(ov);
             return;
         }
+                // perbesar foto bukti
+        var zm = t.closest('a[data-zoom]');
+        if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
 
         // klik overlay (di luar modal)
         if (t.classList && t.classList.contains('modal-overlay')) { KK.closeModal(t); return; }

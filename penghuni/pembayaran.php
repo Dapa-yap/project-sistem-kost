@@ -46,6 +46,7 @@ include ROOT_PATH . '/header/header.php';
             <div class="chips pay-toolbar" data-filter-target="#pay-body" data-filter-attr="status">
                 <button class="chip active" data-filter="all">Semua</button>
                 <button class="chip" data-filter="belum">Belum Dibayar</button>
+                <button class="chip" data-filter="terlambat">Terlambat</button> 
                 <button class="chip" data-filter="menunggu">Menunggu Verifikasi</button>
                 <button class="chip" data-filter="lunas">Lunas</button>
             </div>
@@ -64,7 +65,7 @@ include ROOT_PATH . '/header/header.php';
                                 <td class="nowrap"><?= e(tgl($t['jatuh_tempo'])) ?></td>
                                 <td class="nowrap"><?= e(rupiah($t['jumlah'])) ?></td>
                                 <td class="col-status"><?= status_badge('bayar', $t['status']) ?></td>
-                                <td class="bukti"><?= $t['bukti'] ? '<a class="file" target="_blank" rel="noopener" href="' . e(url('api/berkas.php?f=' . urlencode($t['bukti']))) . '">Lihat foto</a>' : '—' ?></td>
+                                <td class="bukti"><?= $t['bukti'] ? '<a class="file" data-act="detail" href="' . e(url('api/berkas.php?f=' . urlencode($t['bukti']))) . '">Lihat foto</a>' : '—' ?></td>
                                 <td class="col-aksi"><div class="actions">
                                     <?php if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)): ?>
                                         <button class="btn btn-outline btn-sm" type="button" data-act="bukti">Kirim Bukti</button>
@@ -145,6 +146,7 @@ include ROOT_PATH . '/header/header.php';
             <div><h3 id="mdt-title">Detail tagihan</h3><p id="mdt-sub">-</p></div>
             <button class="modal-x" type="button" data-close aria-label="Tutup"><?= icon('x', 16) ?></button>
         </div>
+        <div class="proof" id="mdt-proof"><strong>Bukti transfer</strong><span id="mdt-file">-</span></div>
         <div class="modal-info" id="mdt-info"></div>
         <div class="modal-foot"><button class="btn btn-primary" type="button" data-close>Tutup</button></div>
     </div>

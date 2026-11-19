@@ -43,3 +43,19 @@
 @media (max-width: 900px) {
     .dash-top, .dash-grid, .aduan-grid { grid-template-columns: 1fr; }
 }
+.proof {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;
+    min-height: 110px; border: 1.5px dashed #b6c4e6; border-radius: var(--radius-sm); background: #f4f7fe; margin-bottom: 14px; padding: 12px;
+}
+.proof strong { color: var(--navy); font-size: 13.5px; }
+.proof span { color: var(--muted); font-size: 13px; max-width: 100%; }
+.proof.is-empty strong { color: var(--muted); }
+.proof-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-top: 8px;
+}
