@@ -215,7 +215,7 @@
             return;
         }
                 // perbesar foto bukti
-        var zm = t.closest('a[data-zoom]');
+        var zm = t.closest('a[data-zoom], a[href*="api/berkas.php"]:not([data-act])');
         if (zm) { ev.preventDefault(); KK.lihatFoto(zm.getAttribute('href')); return; }
 
         // klik overlay (di luar modal)

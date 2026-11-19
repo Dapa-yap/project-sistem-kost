@@ -29,10 +29,10 @@
     function fail(err) { KK.toast(err && err.message ? err.message : 'Gagal menyimpan', 'error'); }
     function berkas(f) { return KK.url('api/berkas.php?f=' + encodeURIComponent(f)); }
     function buktiHtml(f) {
-    if (!f) return 'Belum ada bukti';
-    var src = KK.esc(berkas(f));
-    return '<a href="' + src + '" target="_blank" rel="noopener" title="Klik untuk memperbesar">' +
-           '<img class="proof-img" src="' + src + '" alt="Bukti transfer"></a>';
+        if (!f) return 'Belum ada bukti';
+        var src = KK.esc(berkas(f));
+        return '<a href="' + src + '" data-zoom title="Klik untuk memperbesar">' +
+               '<img class="proof-img" src="' + src + '" alt="Bukti transfer"></a>';
     }
     function selectRow(tbodySel, tr) {
         $$(tbodySel + ' tr').forEach(function (r) { r.classList.toggle('is-selected', r === tr); });
