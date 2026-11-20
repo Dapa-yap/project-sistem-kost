@@ -1,0 +1,13 @@
+# Foto upload pengguna (bukti bayar, foto aduan, foto kamar)
+uploads/*
+!uploads/.gitkeep
+
+# Rahasia & dump database
+.env
+*.env
+dump-*.sql
+
+# Lain-lain
+.vscode/
+.idea/
+*.log
