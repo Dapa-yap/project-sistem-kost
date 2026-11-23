@@ -57,42 +57,45 @@ function set_status_kamar($kamarId, $status, $userid = false) {
    PEMELIHARAAN OTOMATIS (dipanggil tiap kali admin / penghuni membuka halaman)
    ===================================================================== */
 
-/** Tagihan lewat jatuh tempo -> 'terlambat'; buat tagihan bulan berjalan untuk semua penghuni aktif. */
-function sinkron_tagihan() {
-    $today = date('Y-m-d');
+/** Pasang ulang view & function (database/objek_db.sql). Dipakai otomatis bila fungsi belum ada. */
+function pasang_objek_db() {
+    db()->exec(file_get_contents(ROOT_PATH . '/database/objek_db.sql'));
+}
 
-    foreach (db_rows('SELECT id, status::text AS s FROM pembayaran WHERE jatuh_tempo < CURRENT_DATE') as $r) {
-        if (norm_status($r['s']) === 'belum') {
-            db_exec('UPDATE pembayaran SET status = ? WHERE id = ?', [db_enum_value('pembayaran', 'status', 'terlambat'), $r['id']]);
-        }
-    }
-
-    $rows = db_rows('SELECT u.id AS uid, k.id AS kid, k.harga, COALESCE(u.tanggal_masuk, CURRENT_DATE) AS masuk
-                     FROM kamar k JOIN "user" u ON u.id = k.userid WHERE COALESCE(u.aktif, TRUE)');
-    foreach ($rows as $r) {
-        // tagihan terbaru yang jatuh pada tanggal <= hari ini (siklus bulanan mengikuti tanggal masuk)
-        $n = 0;
-        if ($r['masuk'] > $today) continue;               // belum masuk, tagihan pertama dibuat saat penghuni ditambahkan
-        while (tambah_bulan($r['masuk'], $n + 1) <= $today) $n++;
-        $due = tambah_bulan($r['masuk'], $n);
-        db_exec('INSERT INTO pembayaran (userid, kamarid, tanggal_tagihan, jatuh_tempo, jumlah, status)
-                 SELECT ?, ?, ?::date, (?::date + 7), ?, ?
-                 WHERE NOT EXISTS (SELECT 1 FROM pembayaran WHERE userid = ? AND tanggal_tagihan = ?::date)',
-            [$r['uid'], $r['kid'], $due, $due, $r['harga'], db_enum_value('pembayaran', 'status', 'belum'), $r['uid'], $due]);
+/** Jalankan function database; kalau belum terpasang (SQLSTATE 42883) pasang dulu lalu ulangi. */
+function panggil_fungsi_db($sql, array $params) {
+    try {
+        return db_one($sql, $params);
+    } catch (PDOException $e) {
+        if ($e->getCode() !== '42883') throw $e;
+        pasang_objek_db();
+        return db_one($sql, $params);
     }
 }
 
-/** Booking yang lewat batas waktu -> kedaluwarsa, kamar yang ditahan dilepas. */
+/**
+ * Tagihan lewat jatuh tempo -> 'terlambat'; buat tagihan bulan berjalan untuk semua penghuni aktif.
+ * Seluruh logikanya ada di function fn_sinkron_tagihan() (database/objek_db.sql):
+ * satu panggilan set-based, bukan loop per tagihan seperti sebelumnya.
+ */
+function sinkron_tagihan() {
+    return panggil_fungsi_db('SELECT * FROM fn_sinkron_tagihan(?::date, ?, ?)', [
+        date('Y-m-d'),
+        db_enum_value('pembayaran', 'status', 'belum'),
+        db_enum_value('pembayaran', 'status', 'terlambat'),
+    ]);
+}
+
+/**
+ * Booking yang lewat batas waktu -> kedaluwarsa, kamar yang ditahan dilepas.
+ * Dikerjakan atomik oleh function fn_kedaluwarsakan_booking().
+ */
 function kedaluwarsakan_booking() {
-    foreach (db_rows('SELECT id, kamarid, status::text AS s FROM booking WHERE batas_waktu < CURRENT_DATE') as $b) {
-        $st = norm_status($b['s']);
-        if ($st !== 'menunggu' && $st !== 'dikonfirmasi') continue;
-        db_exec('UPDATE booking SET status = ? WHERE id = ?', [db_enum_value('booking', 'status', 'kedaluwarsa'), $b['id']]);
-        if ($st === 'dikonfirmasi') {
-            $k = db_one('SELECT status::text AS s, userid FROM kamar WHERE id = ?', [$b['kamarid']]);
-            if ($k && norm_status($k['s']) === 'booking' && !$k['userid']) set_status_kamar($b['kamarid'], 'kosong');
-        }
-    }
+    return panggil_fungsi_db('SELECT * FROM fn_kedaluwarsakan_booking(?::date, ?, ?)', [
+        date('Y-m-d'),
+        db_enum_value('booking', 'status', 'kedaluwarsa'),
+        db_enum_value('kamar', 'status', 'kosong'),
+    ]);
 }
 
 /* =====================================================================
@@ -307,9 +310,10 @@ function ajukan_pindah($userId, $tujuanNomor, $tgl, $alasan) {
     if (!$tujuan || $tujuan['userid'] || $tujuan['status'] !== 'kosong') gagal('Kamar tujuan tidak kosong.');
     if (db_one('SELECT 1 FROM pindah_kamar WHERE userid = ? AND status::text = ?', [$userId, db_enum_value('pindah_kamar', 'status', 'menunggu')]))
         gagal('Anda masih punya pengajuan pindah yang belum diproses.');
-    foreach (db_rows('SELECT status::text AS s FROM pembayaran WHERE userid = ? AND tanggal_tagihan <= CURRENT_DATE', [$userId]) as $p) {
-        if (norm_status($p['s']) !== 'lunas') gagal('Tagihan bulan berjalan harus lunas sebelum mengajukan pindah.');
-    }
+    // GROUP BY + HAVING: baris hanya muncul bila penghuni punya minimal satu tagihan (sampai hari ini) yang belum lunas
+    if (db_one("SELECT userid FROM pembayaran WHERE userid = ? AND tanggal_tagihan <= CURRENT_DATE
+                GROUP BY userid HAVING COUNT(*) FILTER (WHERE lower(status::text) <> 'lunas') > 0", [$userId]))
+        gagal('Tagihan bulan berjalan harus lunas sebelum mengajukan pindah.');
     db_exec('INSERT INTO pindah_kamar (userid, kamar_asal, kamar_tujuan, tanggal, alasan, status) VALUES (?, ?, ?, ?, ?, ?)',
         [$userId, $asal['id'], $tujuan['id'], $tgl, $alasan, db_enum_value('pindah_kamar', 'status', 'menunggu')]);
 }

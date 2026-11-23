@@ -111,15 +111,22 @@ function find_user($username, $password, $role) {
 }
 
 /* ---------- Kamar ---------- */
+/**
+ * Semua kamar + penghuni + fasilitas privatnya dalam SATU query:
+ * JOIN kamar -> user -> kamar_fasilitas -> fasilitas, lalu GROUP BY per kamar dan
+ * fasilitas dikumpulkan dengan json_agg (urutan mengikuti id fasilitas).
+ * Dipakai denah, daftar kamar pengunjung, detail kamar, dan halaman admin.
+ */
 function get_kamar() {
     $rows = db_rows('SELECT k.id, k.nomor_kamar, k.tipe::text AS tipe, k.ukuran, k.harga, k.status::text AS status,
-                            k.foto, k.foto2, u.nama AS penghuni
-                     FROM kamar k LEFT JOIN "user" u ON u.id = k.userid
+                            k.foto, k.foto2, u.nama AS penghuni,
+                            COALESCE(json_agg(f.nama ORDER BY f.id) FILTER (WHERE f.kategori::text = \'private\'), \'[]\') AS fasilitas
+                     FROM kamar k
+                     LEFT JOIN "user" u ON u.id = k.userid
+                     LEFT JOIN kamar_fasilitas kf ON kf.kamarid = k.id
+                     LEFT JOIN fasilitas f ON f.id = kf.fasilitasid
+                     GROUP BY k.id, u.nama
                      ORDER BY k.nomor_kamar');
-    $fas = [];
-    foreach (db_rows('SELECT kf.kamarid, f.nama FROM kamar_fasilitas kf JOIN fasilitas f ON f.id = kf.fasilitasid WHERE f.kategori::text = \'private\' ORDER BY f.id') as $f) {
-        $fas[$f['kamarid']][] = $f['nama'];
-    }
     $out = [];
     foreach ($rows as $r) {
         $id = $r['nomor_kamar'];
@@ -135,8 +142,28 @@ function get_kamar() {
             'foto'      => $r['foto'],
             'foto2'     => $r['foto2'],
             'kapasitas' => '1 orang',
-            'fasilitas' => $fas[$r['id']] ?? [],
+            'fasilitas' => json_decode($r['fasilitas'], true) ?: [],
         ];
+    }
+    return $out;
+}
+
+/** Ringkasan kamar (total / terisi / kosong) dari view v_statistik_kamar - dipakai dashboard pengelola. */
+function get_statistik_kamar() {
+    $r = db_one('SELECT total, terisi, kosong FROM v_statistik_kamar');
+    return ['total' => (int) $r['total'], 'terisi' => (int) $r['terisi'], 'kosong' => (int) $r['kosong']];
+}
+
+/**
+ * Jumlah baris per status (GROUP BY) untuk kartu ringkasan halaman Pengaduan & Booking.
+ * Status dinormalkan lewat norm_status(), jadi 'kadaluarsa' dan 'kedaluwarsa' dihitung satu.
+ */
+function get_ringkasan_status($tabel) {
+    if (!in_array($tabel, ['pengaduan', 'booking'], true)) throw new InvalidArgumentException('Tabel tidak didukung.');
+    $out = [];
+    foreach (db_rows("SELECT status::text AS status, COUNT(*) AS n FROM $tabel GROUP BY status::text") as $r) {
+        $st = norm_status($r['status']);
+        $out[$st] = ($out[$st] ?? 0) + (int) $r['n'];
     }
     return $out;
 }
@@ -177,11 +204,25 @@ function get_aturan() {
 
 /* ---------- Penghuni ---------- */
 function get_penghuni() {
-    $rows = db_rows('SELECT u.id AS uid, u.nama, u.no_hp, u.tanggal_masuk, k.nomor_kamar, k.tipe::text AS tipe, k.harga,
-                            (SELECT MIN(p.tanggal_tagihan) FROM pembayaran p WHERE p.userid = u.id) AS tagihan_pertama,
-                            (SELECT p.status::text FROM pembayaran p WHERE p.userid = u.id ORDER BY p.tanggal_tagihan DESC, p.id DESC LIMIT 1) AS tagihan,
-                            (SELECT COUNT(*) FROM pengaduan a WHERE a.userid = u.id AND a.status::text <> \'selesai\') AS aduan
-                     FROM kamar k JOIN "user" u ON u.id = k.userid
+    // Tiga CTE (masing-masing GROUP BY / DISTINCT ON per penghuni) menggantikan 3 subquery
+    // berkorelasi yang dulu dijalankan ulang untuk setiap baris penghuni.
+    $rows = db_rows('WITH tagihan_pertama AS (
+                         SELECT userid, MIN(tanggal_tagihan) AS tanggal FROM pembayaran GROUP BY userid
+                     ),
+                     tagihan_terakhir AS (
+                         SELECT DISTINCT ON (userid) userid, status::text AS status
+                         FROM pembayaran ORDER BY userid, tanggal_tagihan DESC, id DESC
+                     ),
+                     aduan_aktif AS (
+                         SELECT userid, COUNT(*) AS jumlah FROM pengaduan WHERE status::text <> \'selesai\' GROUP BY userid
+                     )
+                     SELECT u.id AS uid, u.nama, u.no_hp, u.tanggal_masuk, k.nomor_kamar, k.tipe::text AS tipe, k.harga,
+                            tp.tanggal AS tagihan_pertama, tt.status AS tagihan, COALESCE(ad.jumlah, 0) AS aduan
+                     FROM kamar k
+                     JOIN "user" u ON u.id = k.userid
+                     LEFT JOIN tagihan_pertama tp ON tp.userid = u.id
+                     LEFT JOIN tagihan_terakhir tt ON tt.userid = u.id
+                     LEFT JOIN aduan_aktif ad ON ad.userid = u.id
                      WHERE COALESCE(u.aktif, TRUE)
                      ORDER BY k.nomor_kamar');
     $map = ['belum' => 'Belum Dibayar', 'menunggu' => 'Menunggu', 'lunas' => 'Lunas', 'terlambat' => 'Terlambat', 'ditolak' => 'Ditolak'];
@@ -241,6 +282,13 @@ function get_tagihan_penghuni() {
     }
     return $out;
 }
+/** Jumlah & total tagihan lunas milik penghuni yang login (kartu "Dibayar Tahun Ini") - agregasi di database. */
+function get_ringkasan_lunas_penghuni() {
+    $u = current_user();
+    $r = $u ? db_one("SELECT COUNT(*) AS n, COALESCE(SUM(jumlah), 0) AS total
+                      FROM pembayaran WHERE userid = ? AND lower(status::text) = 'lunas'", [$u['id']]) : null;
+    return ['jumlah' => (int) ($r['n'] ?? 0), 'total' => (int) ($r['total'] ?? 0)];
+}
 /** Jumlah tagihan penghuni yang masih harus dibayar / dikirim ulang buktinya (untuk badge menu). */
 function get_badge_penghuni() {
     $n = 0;
@@ -250,14 +298,15 @@ function get_badge_penghuni() {
     return ['pembayaran' => $n];
 }
 
-// Tagihan semua penghuni pada periode (bulan) terbaru
+// Tagihan semua penghuni pada periode (bulan) terbaru - dibaca dari view v_pembayaran_detail
+// (join pembayaran + user + kamar sudah ada di view)
 function get_pembayaran_admin() {
-    $rows = db_rows("SELECT p.id, u.nama, k.nomor_kamar, p.tanggal_tagihan, p.jumlah, p.jatuh_tempo, p.status::text AS status,
-                            p.bukti_pembayaran, p.tanggal_bayar
-                     FROM pembayaran p JOIN \"user\" u ON u.id = p.userid JOIN kamar k ON k.id = p.kamarid
-                     WHERE date_trunc('month', p.tanggal_tagihan) = date_trunc('month', CURRENT_DATE)
-                        OR lower(p.status::text) <> 'lunas'
-                     ORDER BY p.tanggal_tagihan DESC, k.nomor_kamar, p.id");
+    $rows = db_rows("SELECT id, nama, nomor_kamar, tanggal_tagihan, jumlah, jatuh_tempo, status,
+                            bukti_pembayaran, tanggal_bayar
+                     FROM v_pembayaran_detail
+                     WHERE date_trunc('month', tanggal_tagihan) = date_trunc('month', CURRENT_DATE)
+                        OR lower(status) <> 'lunas'
+                     ORDER BY tanggal_tagihan DESC, nomor_kamar, id");
     $out = [];
     foreach ($rows as $r) {
         $out[] = ['id' => (int) $r['id'], 'nama' => $r['nama'], 'kamar' => $r['nomor_kamar'],
@@ -286,14 +335,10 @@ function get_pengaduan_penghuni() {
 }
 
 function get_pengaduan_admin() {
-    $rows = db_rows('SELECT a.id, COALESCE(kb.nomor_kamar, kf_k.nomor_kamar, ku.nomor_kamar, \'-\') AS nomor_kamar,
-                            a.deskripsi, a.foto, a.tanggal_pengaduan, a.status::text AS status
-                     FROM pengaduan a
-                     LEFT JOIN kamar kb ON kb.id = a.kamarid
-                     LEFT JOIN kamar_fasilitas kf ON kf.id = a.kamar_fasilitas_id
-                     LEFT JOIN kamar kf_k ON kf_k.id = kf.kamarid
-                     LEFT JOIN kamar ku ON ku.userid = a.userid
-                     ORDER BY a.tanggal_pengaduan DESC, a.id DESC');
+    // view v_pengaduan_detail sudah menyelesaikan nomor kamar dari 3 jalur (COALESCE)
+    $rows = db_rows('SELECT id, nomor_kamar, deskripsi, foto, tanggal_pengaduan, status
+                     FROM v_pengaduan_detail
+                     ORDER BY tanggal_pengaduan DESC, id DESC');
     $out = [];
     foreach ($rows as $r) {
         $out[] = ['id' => (int) $r['id'], 'kamar' => $r['nomor_kamar'], 'deskripsi' => $r['deskripsi'],
@@ -301,20 +346,22 @@ function get_pengaduan_admin() {
     }
     return $out;
 }
-/** Jumlah item yang perlu ditindaklanjuti admin (untuk badge di menu). */
+/**
+ * Jumlah item yang perlu ditindaklanjuti admin (untuk badge di menu).
+ * Header admin dimuat di setiap halaman, jadi 4 hitungan dikumpulkan dalam SATU query
+ * (4 subquery skalar) - bukan 4 round-trip terpisah.
+ * pembayaran = bukti transfer belum diverifikasi, pengaduan = aduan baru,
+ * booking = belum dikonfirmasi, jadwal = survey belum dikonfirmasi.
+ */
 function get_badge_admin() {
-    $hitung = function ($tabel, $status) {
-        $r = db_one("SELECT COUNT(*) AS n FROM $tabel WHERE lower(status::text) = ?", [$status]);
-        return (int) ($r['n'] ?? 0);
-    };
-    return [
-        'pembayaran' => $hitung('pembayaran', 'menunggu'),   // bukti transfer belum diverifikasi
-        'pengaduan'  => $hitung('pengaduan',  'diajukan'),   // aduan baru
-        'booking'    => $hitung('booking',    'menunggu'),   // booking belum dikonfirmasi
-        'jadwal'     => (int) (db_one("SELECT COUNT(*) AS n FROM kunjungan
-                               WHERE lower(status::text) = 'menunggu'
-                                 AND COALESCE(jenis, 'kunjungan') = 'survey'")['n'] ?? 0),   // survey belum dikonfirmasi
-    ];
+    $r = db_one("SELECT
+                    (SELECT COUNT(*) FROM pembayaran WHERE lower(status::text) = 'menunggu') AS pembayaran,
+                    (SELECT COUNT(*) FROM pengaduan  WHERE lower(status::text) = 'diajukan') AS pengaduan,
+                    (SELECT COUNT(*) FROM booking    WHERE lower(status::text) = 'menunggu') AS booking,
+                    (SELECT COUNT(*) FROM kunjungan  WHERE lower(status::text) = 'menunggu'
+                                                         AND COALESCE(jenis, 'kunjungan') = 'survey') AS jadwal");
+    return ['pembayaran' => (int) $r['pembayaran'], 'pengaduan' => (int) $r['pengaduan'],
+            'booking' => (int) $r['booking'], 'jadwal' => (int) $r['jadwal']];
 }
 
 /* ---------- Booking (calon penghuni) ---------- */

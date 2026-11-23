@@ -4,7 +4,8 @@ require_role('admin');
 
 $role = 'admin'; $pageTitle = 'Booking Kamar'; $pageId = 'admin-booking'; $activeMenu = 'booking';
 $booking = get_booking();
-$cnt = fn($s) => count(array_filter($booking, fn($b) => $b['status'] === $s));
+$ringkas = get_ringkasan_status('booking');   // GROUP BY status di database
+$cnt = fn($s) => $ringkas[$s] ?? 0;
 $urgent = count(array_filter($booking, fn($b) => $b['status'] === 'menunggu' && $b['urgent']));
 $pageData = ['booking' => $booking];
 

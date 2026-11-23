@@ -7,8 +7,8 @@ $role = 'penghuni'; $pageTitle = 'Pembayaran'; $pageId = 'penghuni-pembayaran'; 
 $tagihan = get_tagihan_penghuni();
 $aktif = null;
 foreach ($tagihan as $t) { if (in_array($t['status'], ['belum', 'terlambat', 'ditolak'], true)) { $aktif = $t; } }   // tertua yang belum beres
-$lunas = array_filter($tagihan, fn($t) => $t['status'] === 'lunas');
-$totalLunas = array_sum(array_column($lunas, 'jumlah'));
+$ringkasLunas = get_ringkasan_lunas_penghuni();   // agregasi COUNT/SUM di database
+$totalLunas = $ringkasLunas['total'];
 $sisaHari = $aktif ? max(0, (int) ceil((strtotime($aktif['jatuh_tempo']) - strtotime(date('Y-m-d'))) / 86400)) : null;
 
 $pageData = ['bukaBayar' => $_GET['bayar'] ?? null];
@@ -34,7 +34,7 @@ include ROOT_PATH . '/header/header.php';
                 <div class="stat">
                     <div class="stat-label">Dibayar Tahun Ini</div>
                     <div class="stat-value is-money" id="stat-lunas"><?= e(rupiah($totalLunas)) ?></div>
-                    <div class="stat-note" id="stat-lunas-note"><?= count($lunas) ?> pembayaran lunas</div>
+                    <div class="stat-note" id="stat-lunas-note"><?= $ringkasLunas['jumlah'] ?> pembayaran lunas</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">Jatuh Tempo Berikutnya</div>

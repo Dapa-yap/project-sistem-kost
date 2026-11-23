@@ -8,11 +8,10 @@ $host    = getenv('DB_HOST') ?: 'localhost';
 $port    = getenv('DB_PORT') ?: '5432';
 $db      = getenv('DB_NAME') ?: 'db_pbl';
 $user    = getenv('DB_USER') ?: 'postgres';
-$pass    = getenv('DB_PASS') ?: 'postgres';
-$sslmode = getenv('DB_SSLMODE') ?: 'prefer';   // isi 'require' untuk Supabase
+$pass    = getenv('DB_PASS') ?: 'isi sendiri boskuh';
 
 try {
-    $pdo = new PDO("pgsql:host=$host;port=$port;dbname=$db;sslmode=$sslmode", $user, $pass, [
+    $pdo = new PDO("pgsql:host=$host;port=$port;dbname=$db;", $user, $pass, [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => true,   // parameter dikirim sebagai literal, aman untuk kolom enum

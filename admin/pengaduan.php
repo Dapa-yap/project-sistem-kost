@@ -4,7 +4,8 @@ require_role('admin');
 
 $role = 'admin'; $pageTitle = 'Pengaduan'; $pageId = 'admin-pengaduan'; $activeMenu = 'pengaduan';
 $aduan = get_pengaduan_admin();
-$cnt = fn($s) => count(array_filter($aduan, fn($a) => $a['status'] === $s));
+$ringkas = get_ringkasan_status('pengaduan');   // GROUP BY status di database
+$cnt = fn($s) => $ringkas[$s] ?? 0;
 $pageData = ['aduan' => $aduan];
 
 include ROOT_PATH . '/header/header.php';

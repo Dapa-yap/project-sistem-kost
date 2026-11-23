@@ -6,7 +6,8 @@
  *   php database/setup.php <username> "<Nama Pengelola>" <password>
  *
  * Yang dilakukan:
- *   1. Membuat tabel / kolom yang belum ada (database/schema.sql).
+ *   1. Membuat tabel / kolom yang belum ada (database/schema.sql), lalu memasang
+ *      view & function (database/objek_db.sql).
  *   2. Menambahkan nilai enum yang dibutuhkan aplikasi (kalau kolom kamu bertipe enum).
  *   3. Mengisi data kamar (A-01..A-11, B-01..B-07) & fasilitas bila tabel kamar masih kosong.
  *   4. Membuat akun pengelola. Pengelola hanya boleh SATU: kalau sudah ada, tidak ditambah lagi.
@@ -26,6 +27,11 @@ function ask($label) { echo $label; return trim((string) fgets(STDIN)); }
 say('1. Menyiapkan tabel ...');
 db()->exec(file_get_contents(__DIR__ . '/schema.sql'));
 say('   selesai.');
+
+/* ---------- 1b. View & function ---------- */
+say('1b. Memasang view & function (database/objek_db.sql) ...');
+db()->exec(file_get_contents(__DIR__ . '/objek_db.sql'));
+say('   v_pembayaran_detail, v_pengaduan_detail, v_statistik_kamar, fn_sinkron_tagihan, fn_kedaluwarsakan_booking.');
 
 /* ---------- 2. Nilai enum ---------- */
 say('2. Mengecek tipe enum ...');

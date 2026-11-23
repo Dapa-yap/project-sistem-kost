@@ -4,17 +4,17 @@ require_role('admin');
 
 $role = 'admin'; $pageTitle = 'Dashboard Pengelola'; $pageId = 'admin-dashboard'; $activeMenu = 'dashboard';
 
-$kamar   = get_kamar();
-$total   = count($kamar);
-$terisi  = count(array_filter($kamar, fn($k) => $k['status'] === 'terisi'));
-$kosong  = count(array_filter($kamar, fn($k) => $k['status'] === 'kosong'));
+$stat     = get_statistik_kamar();   // satu baris agregat dari view v_statistik_kamar
+$total    = $stat['total'];
+$terisi   = $stat['terisi'];
+$kosong   = $stat['kosong'];
 $hunian  = $total ? round($terisi / $total * 100) : 0;
 
 $pay     = get_pembayaran_admin();
 $menunggu = array_values(array_filter($pay, fn($p) => $p['status'] === 'menunggu'));
 $booking = array_values(array_filter(get_booking(), fn($b) => $b['status'] === 'menunggu'));
 $aduan   = get_pengaduan_admin();
-$aduanBaru = count(array_filter($aduan, fn($a) => $a['status'] === 'diajukan'));
+$aduanBaru = get_ringkasan_status('pengaduan')['diajukan'] ?? 0;
 $aduanTampil = array_slice(array_values(array_filter($aduan, fn($a) => $a['status'] !== 'selesai')), 0, 3);
 
 $pageData = ['pembayaran' => $pay, 'aduan' => $aduan];
