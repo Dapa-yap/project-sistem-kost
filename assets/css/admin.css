@@ -78,3 +78,17 @@
     .split, .split-wide { grid-template-columns: 1fr; }
     .panel-sticky { position: static; }
 }
+.quota-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 18px 22px; margin-bottom: 20px; border-radius: 14px; color: #fff;
+    background: linear-gradient(135deg, #0b2f5c 0%, #0f4a8a 60%, #1d6bb8 100%);
+}
+.quota-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.quota-info small { font-size: 12px; opacity: .85; }
+.quota-info strong { font-size: 20px; }
+.quota-info span { font-size: 12px; opacity: .85; }
+.quota-bar { height: 6px; margin-top: 8px; background: rgba(255,255,255,.3); border-radius: 99px; overflow: hidden; }
+.quota-bar i { display: block; height: 100%; background: #fff; border-radius: 99px; transition: width .4s; }
+@media (max-width: 600px) {
+    .quota-banner { flex-direction: column; align-items: stretch; }
+}

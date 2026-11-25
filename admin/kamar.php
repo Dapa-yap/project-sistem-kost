@@ -5,6 +5,10 @@ require_role('admin');
 $role = 'admin'; $pageTitle = 'Data Kamar'; $pageId = 'admin-kamar'; $activeMenu = 'kamar';
 $kamar = get_kamar();
 $first = reset($kamar);
+$kuotaMax   = 25;                         // batas kamar, ubah sesuai kebutuhan
+$kuotaPakai = count($kamar);
+$kuotaSisa  = max(0, $kuotaMax - $kuotaPakai);
+$kuotaPersen = $kuotaMax > 0 ? min(100, round($kuotaPakai / $kuotaMax * 100)) : 0;
 $pageData = ['kamar' => $kamar];
 $fasilitasMaster = ['AC', 'Kipas angin', 'Wi-Fi', 'Kasur & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi'];
 
@@ -16,6 +20,14 @@ include ROOT_PATH . '/header/header.php';
     </div></section>
 
     <section class="page-body" style="padding-top:28px"><div class="container">
+        <div class="quota-banner">
+    <div class="quota-info">
+        <small>Kuota Kamar (Free)</small>
+        <strong><?= $kuotaPakai ?> / <?= $kuotaMax ?> digunakan</strong>
+        <span>Sisa <?= $kuotaSisa ?> slot tersedia</span>
+        <div class="quota-bar"><i style="width:<?= $kuotaPersen ?>%"></i></div>
+        </div>
+        </div>
         <div class="chip-row">
             <div class="chips" data-filter-target="#floor-wrap" data-filter-attr="lantai">
                 <button class="chip active" data-filter="all">Semua</button>
