@@ -22,7 +22,7 @@ include ROOT_PATH . '/header/header.php';
     <section class="page-body" style="padding-top:28px"><div class="container">
         <div class="quota-banner">
     <div class="quota-info">
-        <small>Kuota Kamar (Free)</small>
+        <small>Kuota Kamar </small>
         <strong><?= $kuotaPakai ?> / <?= $kuotaMax ?> digunakan</strong>
         <span>Sisa <?= $kuotaSisa ?> slot tersedia</span>
         <div class="quota-bar"><i style="width:<?= $kuotaPersen ?>%"></i></div>
