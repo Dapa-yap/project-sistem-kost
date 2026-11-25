@@ -53,7 +53,7 @@ include ROOT_PATH . '/header/header.php';
         </div>
     </section>
 
-    <!-- Fasilitas bersama -->
+      <!-- Fasilitas bersama -->
     <section class="section">
         <div class="container">
             <div class="section-title is-left">
@@ -67,6 +67,9 @@ include ROOT_PATH . '/header/header.php';
                         <h3><?= e($f['nama']) ?></h3>
                     </div>
                 <?php endforeach; ?>
+            </div>
+            <div class="section-more">
+                <a class="btn btn-outline" href="<?= url('guest/fasilitas.php') ?>">Lihat Semua Fasilitas →</a>
             </div>
         </div>
     </section>
