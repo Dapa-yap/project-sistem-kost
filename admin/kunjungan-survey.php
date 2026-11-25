@@ -51,11 +51,12 @@ include ROOT_PATH . '/header/header.php';
 
 
             <!-- =================================================
-                 TAB
+                 TAB (disembunyikan; elemennya tetap ada karena
+                 admin.js memerlukan #ks-tabs)
                  ================================================= -->
 
             <div
-                class="chips"
+                class="chips hidden"
                 id="ks-tabs"
                 style="margin-bottom:20px"
             >

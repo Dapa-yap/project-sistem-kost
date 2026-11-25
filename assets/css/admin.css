@@ -2,6 +2,17 @@
    KostKu - admin.css
    Dashboard, kamar, penghuni, pembayaran, pengaduan, booking (pengelola)
    ========================================================= */
+
+/* Satu warna biru untuk banner Kuota Kamar dan semua kotak statistik */
+:root {
+    --gradasi-biru: linear-gradient(
+        135deg,
+        #243B78 0%,
+        #34539B 55%,
+        #4568B2 100%
+    );
+}
+
 .admin-wrap { max-width: 1120px; }
 .split { display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start; }
 .split-wide { grid-template-columns: 1.7fr 1fr; }
@@ -81,7 +92,7 @@
 .quota-banner {
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
     padding: 18px 22px; margin-bottom: 20px; border-radius: 14px; color: #fff;
-    background: linear-gradient(135deg, #0b2f5c 0%, #0f4a8a 60%, #1d6bb8 100%);
+    background: var(--gradasi-biru);
 }
 .quota-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .quota-info small { font-size: 12px; opacity: .85; }
@@ -104,3 +115,12 @@
 .bar { width: 100%; max-width: 44px; min-height: 2px; background: #cbd5e1; border-radius: 6px 6px 0 0; }
 .bar.is-now { background: var(--navy); }
 .bar-val, .bar-lb { font-size: .8rem; color: var(--muted); }
+
+/* ---------- Kotak statistik: biru yang sama dengan Kuota Kamar ---------- */
+.stat {
+    background: var(--gradasi-biru);
+    border-color: transparent;
+}
+.stat .stat-label,
+.stat .stat-note { color: rgba(255, 255, 255, .92); }
+.stat .stat-value { color: #fff; }

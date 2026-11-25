@@ -14,15 +14,17 @@ include ROOT_PATH . '/header/header.php';
     </div></section>
 
     <section class="page-body" style="padding-top:28px"><div class="container">
+
+        <div class="chips chip-row" data-filter-target="#pay-body" data-filter-attr="status">
+            <button class="chip active" data-filter="all">Semua</button>
+            <button class="chip" data-filter="menunggu">Menunggu</button>
+            <button class="chip" data-filter="belum">Belum Dibayar</button>
+            <button class="chip" data-filter="lunas">Lunas</button>
+            <button class="chip" data-filter="terlambat">Terlambat</button>
+        </div>
+
         <div class="split">
             <div>
-                <div class="chips chip-row" data-filter-target="#pay-body" data-filter-attr="status">
-                    <button class="chip active" data-filter="all">Semua</button>
-                    <button class="chip" data-filter="menunggu">Menunggu</button>
-                    <button class="chip" data-filter="belum">Belum Dibayar</button>
-                    <button class="chip" data-filter="lunas">Lunas</button>
-                    <button class="chip" data-filter="terlambat">Terlambat</button>
-                </div>
                 <div class="card">
                     <div class="card-head"><h2>Daftar Tagihan</h2></div>
                     <div class="table-wrap"><table class="table table-stack">
