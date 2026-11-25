@@ -43,13 +43,16 @@ include ROOT_PATH . '/header/header.php';
                 </form>
             </div>
 
-            <div class="card">
+                <div class="card">
                 <h2 style="margin-bottom:16px">Riwayat Pengaduan</h2>
                 <div id="aduan-list">
                     <?php foreach ($riwayat as $a): ?>
                         <div class="list-item">
                             <div class="row"><strong><?= e($a['judul']) ?></strong><?= status_badge('aduan', $a['status']) ?></div>
                             <small>Dilaporkan <?= e(tgl($a['tgl'])) ?> · <?= e($a['info']) ?></small>
+                            <?php if ($a['catatan'] !== ''): ?>
+                                <div class="aduan-catatan"><b>Catatan pengelola:</b> <?= e($a['catatan']) ?></div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>

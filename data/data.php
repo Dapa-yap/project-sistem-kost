@@ -322,14 +322,15 @@ function get_pembayaran_admin() {
 function get_pengaduan_penghuni() {
     $u = current_user();
     if (!$u) return [];
-    $rows = db_rows('SELECT a.deskripsi, a.tanggal_pengaduan, a.tanggal_perbaikan, a.status::text AS status
+    $rows = db_rows('SELECT a.deskripsi, a.tanggal_pengaduan, a.tanggal_perbaikan, a.status::text AS status, a.catatan
                      FROM pengaduan a WHERE a.userid = ? ORDER BY a.tanggal_pengaduan DESC, a.id DESC', [$u['id']]);
     $out = [];
     foreach ($rows as $r) {
         $st = norm_status($r['status']);
         $info = $st === 'selesai' && $r['tanggal_perbaikan'] ? 'Diperbaiki ' . tgl($r['tanggal_perbaikan'])
               : ($st === 'diproses' ? 'Sedang diproses pengelola' : 'Menunggu ditinjau pengelola');
-        $out[] = ['judul' => $r['deskripsi'], 'tgl' => $r['tanggal_pengaduan'], 'status' => $st, 'info' => $info];
+        $out[] = ['judul' => $r['deskripsi'], 'tgl' => $r['tanggal_pengaduan'], 'status' => $st,
+                  'info' => $info, 'catatan' => trim((string) $r['catatan'])];
     }
     return $out;
 }
