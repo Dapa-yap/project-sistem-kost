@@ -317,6 +317,66 @@ function get_pembayaran_admin() {
     }
     return $out;
 }
+/* ---------- Laporan keuangan ---------- */
+/** $bulan berformat 'YYYY-MM'. Mengembalikan ringkasan, tren 6 bulan, dan rincian tagihan. */
+function get_laporan_keuangan($bulan) {
+    $awal = $bulan . '-01';
+
+    // 1. Semua tagihan pada bulan yang dipilih
+    $rows = db_rows("SELECT id, nama, nomor_kamar, jatuh_tempo, jumlah, status
+                     FROM v_pembayaran_detail
+                     WHERE date_trunc('month', tanggal_tagihan) = date_trunc('month', ?::date)
+                     ORDER BY nomor_kamar, id", [$awal]);
+
+    $urutan = ['terlambat' => 0, 'ditolak' => 1, 'menunggu' => 2, 'belum' => 3, 'lunas' => 4];
+    $hitung = ['lunas' => 0, 'menunggu' => 0, 'belum' => 0, 'terlambat' => 0, 'ditolak' => 0];
+    $total = 0; $diterima = 0; $tunggakan = 0; $tagihan = [];
+
+    foreach ($rows as $r) {
+        $s   = norm_status($r['status']);
+        $jml = (int) $r['jumlah'];
+        $total += $jml;
+        if (isset($hitung[$s])) $hitung[$s]++;
+        if ($s === 'lunas') $diterima += $jml;
+
+        $hari = 0;
+        if ($s === 'terlambat') {
+            $tunggakan += $jml;
+            $hari = max(0, (int) floor((strtotime(date('Y-m-d')) - strtotime($r['jatuh_tempo'])) / 86400));
+        }
+        $tagihan[] = ['kamar' => $r['nomor_kamar'], 'nama' => $r['nama'], 'jatuh_tempo' => $r['jatuh_tempo'],
+                      'jumlah' => $jml, 'status' => $s, 'hari' => $hari];
+    }
+    // yang terlambat tampil paling atas
+    usort($tagihan, fn($a, $b) => (($urutan[$a['status']] ?? 9) <=> ($urutan[$b['status']] ?? 9)) ?: strcmp($a['kamar'], $b['kamar']));
+
+    // 2. Uang masuk (lunas) 6 bulan terakhir, bulan yang kosong diisi 0
+    $map = [];
+    foreach (db_rows("SELECT to_char(tanggal_tagihan, 'YYYY-MM') AS bln, SUM(jumlah) AS total
+                      FROM v_pembayaran_detail
+                      WHERE lower(status) = 'lunas'
+                        AND tanggal_tagihan >= (?::date - interval '5 months')
+                        AND tanggal_tagihan <  (?::date + interval '1 month')
+                      GROUP BY 1", [$awal, $awal]) as $r) {
+        $map[$r['bln']] = (int) $r['total'];
+    }
+    $label = []; $nilai = [];
+    for ($i = 5; $i >= 0; $i--) {
+        $t = strtotime("$awal -$i month");
+        $label[] = periode_label(date('Y-m-01', $t));
+        $nilai[] = $map[date('Y-m', $t)] ?? 0;
+    }
+
+    return [
+        'tagihan'      => $tagihan,
+        'hitung'       => $hitung,
+        'total'        => $total,
+        'diterima'     => $diterima,
+        'tunggakan'    => $tunggakan,
+        'persen'       => $total ? (int) round($diterima / $total * 100) : 0,
+        'tren'         => ['label' => $label, 'nilai' => $nilai],
+    ];
+}
 
 /* ---------- Pengaduan ---------- */
 function get_pengaduan_penghuni() {

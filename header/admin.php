@@ -7,6 +7,7 @@ $menu = [
     'kamar'      => ['Kamar',      'admin/kamar.php'],
     'penghuni'   => ['Penghuni',   'admin/penghuni.php'],
     'pembayaran' => ['Pembayaran', 'admin/pembayaran.php'],
+    'laporan'    => ['Laporan',    'admin/laporan.php'],
     'pengaduan'  => ['Pengaduan',  'admin/pengaduan.php'],
     'booking'    => ['Booking',    'admin/booking.php'],
     'jadwal'     => ['Survey',     'admin/kunjungan-survey.php'],
