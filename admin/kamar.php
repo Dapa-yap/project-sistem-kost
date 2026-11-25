@@ -5,10 +5,10 @@ require_role('admin');
 $role = 'admin'; $pageTitle = 'Data Kamar'; $pageId = 'admin-kamar'; $activeMenu = 'kamar';
 $kamar = get_kamar();
 $first = reset($kamar);
-$kuotaMax   = 25;                         // batas kamar, ubah sesuai kebutuhan
-$kuotaPakai = count($kamar);
-$kuotaSisa  = max(0, $kuotaMax - $kuotaPakai);
-$kuotaPersen = $kuotaMax > 0 ? min(100, round($kuotaPakai / $kuotaMax * 100)) : 0;
+$hitung     = array_count_values(array_column($kamar, 'status'));
+$nKosong    = $hitung['kosong']     ?? 0;
+$nBooking   = $hitung['booking']    ?? 0;
+$nPerbaiki  = $hitung['diperbaiki'] ?? 0;
 $pageData = ['kamar' => $kamar];
 $fasilitasMaster = ['AC', 'Kipas angin', 'Wi-Fi', 'Kasur & bantal', 'Lemari pakaian', 'Meja & kursi belajar', 'Jendela berventilasi'];
 
@@ -20,13 +20,22 @@ include ROOT_PATH . '/header/header.php';
     </div></section>
 
     <section class="page-body" style="padding-top:28px"><div class="container">
-        <div class="quota-banner">
-    <div class="quota-info">
-        <small>Kuota Kamar </small>
-        <strong><?= $kuotaPakai ?> / <?= $kuotaMax ?> digunakan</strong>
-        <span>Sisa <?= $kuotaSisa ?> slot tersedia</span>
-        <div class="quota-bar"><i style="width:<?= $kuotaPersen ?>%"></i></div>
-        </div>
+        <div class="stats cols-3" style="margin-bottom:20px">
+            <div class="stat">
+                <div class="stat-label">Kamar Kosong</div>
+                <div class="stat-value"><?= $nKosong ?></div>
+                <div class="stat-note">Siap dibooking</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Sedang Booking</div>
+                <div class="stat-value"><?= $nBooking ?></div>
+                <div class="stat-note">Menunggu penghuni masuk</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Dalam Perbaikan</div>
+                <div class="stat-value"><?= $nPerbaiki ?></div>
+                <div class="stat-note">Belum bisa dihuni</div>
+            </div>
         </div>
         <div class="chip-row">
             <div class="chips" data-filter-target="#floor-wrap" data-filter-attr="lantai">
