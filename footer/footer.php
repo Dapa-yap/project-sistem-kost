@@ -200,8 +200,8 @@ $role = $role ?? 'guest';
             </span>
 
             <span class="footer-legal">
-                <a href="#">Syarat &amp; Ketentuan</a>
-                <a href="#">Kebijakan Privasi</a>
+                <a href="<?= url('guest/syarat-ketentuan.php') ?>">Syarat &amp; Ketentuan</a>
+                <a href="<?= url('guest/kebijakan-privasi.php') ?>">Kebijakan Privasi</a>
             </span>
         </div>
 
