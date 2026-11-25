@@ -28,10 +28,6 @@ $badgeMap = [
     <div class="room-thumb">
     <?php if (!empty($k['foto'])): ?>
     <img src="<?= url('uploads/' . $k['foto']) ?>" alt="Foto Kamar <?= e($k['id']) ?>" class="room-image">
-    <?php elseif ($k['id'] === 'A-01'): ?>
-    <img src="<?= url('assets/image/a01.1.png') ?>" alt="Foto Kamar A-01" class="room-image">
-    <?php elseif ($k['id'] === 'A-02'): ?>
-    <img src="<?= url('assets/image/a02.1.jpg') ?>" alt="Foto Kamar A-02" class="room-image">
     <?php endif; ?>
 
 

@@ -45,22 +45,12 @@ $bersama = [
 
 /* =========================================================
    FOTO KAMAR
-   Untuk menambah foto kamar lain, tambahkan satu baris di sini
-   dan taruh file gambarnya di folder assets/image/
+   Foto diunggah lewat halaman admin (Kamar > Ubah)
+   dan disimpan di folder uploads/.
    ========================================================= */
 
-$fotoKamar = [
-    'A-01' => ['a01.1.png', 'a01.2.png'],
-    'A-02' => ['a02.1.jpg', 'a02.2.jpg'],
-];
-
-$foto = $fotoKamar[$k['id']] ?? [];
-$fotoFolder = 'assets/image/';
-$fotoUpload = array_values(array_filter([$k['foto'] ?? null, $k['foto2'] ?? null]));
-if ($fotoUpload) {
-    $foto = $fotoUpload;
-    $fotoFolder = 'uploads/';
-}
+$foto = array_values(array_filter([$k['foto'] ?? null, $k['foto2'] ?? null]));
+$fotoFolder = 'uploads/';
 
 /* =========================================================
    KAMAR LAIN YANG MASIH KOSONG
