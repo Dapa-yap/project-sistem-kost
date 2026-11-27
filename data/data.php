@@ -85,28 +85,71 @@ function lantai_dari_nomor($nomor) {
 
 /* ---------- Akun / login ---------- */
 /** Cari akun untuk login. Password boleh hash (password_hash) atau teks biasa. */
-function find_user($username, $password, $role) {
-    $r = db_one('SELECT u.id, u.role::text AS role, u.username, u.password, u.nama, COALESCE(u.aktif, TRUE) AS aktif, k.nomor_kamar
-                 FROM "user" u LEFT JOIN kamar k ON k.userid = u.id
-                 WHERE lower(u.username) = lower(?) LIMIT 1', [$username]);
-    if (!$r || !$r['aktif']) return null;
-    $dbRole = norm_status($r['role']);
-    $dbRole = $dbRole === 'admin' ? 'admin' : 'penghuni';
-    if ($dbRole !== $role) return null;
+function find_user($username, $password, $role = null) {
 
-    $stored = (string) $r['password'];
-    $hashed = (password_get_info($stored)['algo'] ?? null) !== null;
-    $ok = $hashed ? password_verify($password, $stored) : hash_equals($stored, $password);
-    if (!$ok) return null;
+    $r = db_one(
+        'SELECT u.id, u.role::text AS role,
+                u.username, u.password, u.nama,
+                COALESCE(u.aktif, TRUE) AS aktif,
+                k.nomor_kamar
+         FROM "user" u
+         LEFT JOIN kamar k ON k.userid = u.id
+         WHERE lower(u.username) = lower(?)
+         LIMIT 1',
+        [$username]
+    );
 
-    // password lama masih teks biasa / hash usang -> simpan ulang sebagai hash baru
-    if (!$hashed || password_needs_rehash($stored, PASSWORD_DEFAULT)) {
-        db_exec('UPDATE "user" SET password = ? WHERE id = ?', [password_hash($password, PASSWORD_DEFAULT), $r['id']]);
+    if (!$r || !$r['aktif']) {
+        return null;
     }
 
-    $u = ['id' => (int) $r['id'], 'username' => $r['username'], 'role' => $dbRole,
-          'nama' => $r['nama'], 'label' => $dbRole === 'admin' ? 'Pengelola' : 'Penghuni'];
-    if ($r['nomor_kamar']) $u['kamar'] = $r['nomor_kamar'];
+    // Sesuaikan role database dengan role aplikasi
+    $dbRole = norm_status($r['role']);
+
+    $dbRole = $dbRole === 'admin'
+        ? 'admin'
+        : 'penghuni';
+
+    // Jika role dikirim, tetap lakukan pengecekan
+    if ($role !== null && $dbRole !== $role) {
+        return null;
+    }
+
+    // Periksa password
+    $stored = (string) $r['password'];
+
+    $hashed = (password_get_info($stored)['algo'] ?? null) !== null;
+
+    $ok = $hashed
+        ? password_verify($password, $stored)
+        : hash_equals($stored, $password);
+
+    if (!$ok) {
+        return null;
+    }
+
+    // Perbarui password menjadi hash jika masih berupa teks biasa
+    if (!$hashed || password_needs_rehash($stored, PASSWORD_DEFAULT)) {
+        db_exec(
+            'UPDATE "user" SET password = ? WHERE id = ?',
+            [password_hash($password, PASSWORD_DEFAULT), $r['id']]
+        );
+    }
+
+    $u = [
+        'id' => (int) $r['id'],
+        'username' => $r['username'],
+        'role' => $dbRole,
+        'nama' => $r['nama'],
+        'label' => $dbRole === 'admin'
+            ? 'Pengelola'
+            : 'Penghuni'
+    ];
+
+    if ($r['nomor_kamar']) {
+        $u['kamar'] = $r['nomor_kamar'];
+    }
+
     return $u;
 }
 
