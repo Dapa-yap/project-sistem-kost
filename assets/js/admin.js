@@ -473,7 +473,7 @@
 
         var awal = null;
         try { awal = sessionStorage.getItem('kk_kamar'); sessionStorage.removeItem('kk_kamar'); } catch (err) {}
-        render(awal && K[awal] ? awal : (K['A-03'] ? 'A-03' : Object.keys(K)[0]));
+        render(awal && K[awal] ? awal : (K['A-01'] ? 'A-01' : Object.keys(K)[0]));
     }
 
     /* =====================================================
@@ -489,12 +489,9 @@
         var TAGIHAN = { 'Belum Dibayar': 'belum', Lunas: 'lunas', Menunggu: 'menunggu', Terlambat: 'terlambat', Ditolak: 'ditolak' };
 
         function stats() {
-            var kosong = Object.keys(K).filter(function (id) { return K[id].status === 'kosong'; }).length;
             $('#st-total').textContent = P.length;
-            $('#st-terisi').textContent = P.length;
-            $('#st-terisi-note').textContent = 'dari ' + DATA.totalKamar + ' kamar';
-            $('#st-kosong').textContent = kosong;
             var pend = PIN.filter(function (p) { return p.status === 'menunggu'; }).length;
+            $('#st-pindah').textContent = pend;
             $('#pindah-count').textContent = pend + ' menunggu';
             var empty = $('[data-empty]', body);
             empty.classList.toggle('hidden', $$('tr[data-kamar]', body).length > 0);

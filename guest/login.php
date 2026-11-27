@@ -59,7 +59,7 @@ include ROOT_PATH . '/header/header.php';
 
         <aside class="auth-art">
             <div class="auth-art-text">
-                <h2>Selamat datang kembali di KostKu</h2>
+                <h2>Selamat datang di KostKu</h2>
                 <p>Kelola kamar, pembayaran, dan status hunian Anda dalam satu tempat.</p>
             </div>
 

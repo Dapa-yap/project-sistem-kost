@@ -8,7 +8,6 @@ $penghuni = get_penghuni();
 $pindah   = get_pindah_kamar();
 $total    = count($kamar);
 $terisi   = count($penghuni);
-$kosong   = count(array_filter($kamar, fn($k) => $k['status'] === 'kosong'));
 $pending  = count(array_filter($pindah, fn($p) => $p['status'] === 'menunggu'));
 // kamar yang bisa ditempati: kosong, atau sudah ditahan lewat booking
 $kamarKosong = array_values(array_filter($kamar, fn($k) => in_array($k['status'], ['kosong', 'booking'], true)));
@@ -24,10 +23,9 @@ include ROOT_PATH . '/header/header.php';
 
     <section class="page-body" style="padding-top:28px"><div class="container">
         <div class="head-actions">
-            <div class="stats cols-3">
+            <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
                 <div class="stat"><div class="stat-label">Total Penghuni</div><div class="stat-value" id="st-total"><?= $terisi ?></div><div class="stat-note">Aktif saat ini</div></div>
-                <div class="stat"><div class="stat-label">Kamar Terisi</div><div class="stat-value" id="st-terisi"><?= $terisi ?></div><div class="stat-note" id="st-terisi-note">dari <?= $total ?> kamar</div></div>
-                <div class="stat"><div class="stat-label">Kamar Kosong</div><div class="stat-value" id="st-kosong"><?= $kosong ?></div><div class="stat-note">Siap dibooking</div></div>
+                <div class="stat"><div class="stat-label">Pengajuan Pindah Kamar</div><div class="stat-value" id="st-pindah"><?= $pending ?></div><div class="stat-note">Menunggu diproses</div></div>
             </div>
         </div>
 
